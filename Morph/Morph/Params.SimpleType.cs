@@ -1,128 +1,128 @@
 ﻿using Morph.Core;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Morph.Params
 {
+    public delegate void EncodeSimpleType(MorphWriter writer);
+    public delegate void EncodeSimpleValue(MorphWriter writer, object value);
+
     static public class SimpleType
     {
-        public const byte IsSpecial = 0x01;
-        public const byte IsNumeric = 0x00;
-        public const byte IsCharacter = 0x02;
+        #region Constants
 
-        public const byte MaskValueSize = 0x30;
+        public const byte IsInteger = 0x0;
+        public const byte IsCharacter = 0x01;
+        public const byte IsFloat = 0x02;
+        public const byte IsString = 0x03;
+        public const byte IsEnumOrd = 0x04;
+        public const byte IsEnumStr = 0x05;
+        public const byte IsWhen = 0x07;
+        public const byte IsCurrency = 0x08;
+        public const byte IsBool = 0x0C;
+        //public const byte Is = 0x0;
+
+        //  Sizes
+        public const byte MaskValueSize = 0xC0;
         public const byte Size8 = 0x00;
-        public const byte Size16 = 0x10;
-        public const byte Size32 = 0x20;
-        public const byte Size64 = 0x30;
-
-        //  IsNumeric
-        public const byte IsInteger = IsNumeric | 0x00;
-        public const byte IsFloat = IsNumeric | 0x04;
+        public const byte Size16 = 0x40;
+        public const byte Size32 = 0x80;
+        public const byte Size64 = 0xC0;
 
         //  IsCharacter
-        public const byte IsString = IsCharacter | 0x04;
-        public const byte MaskCharEncoding = 0x30;
-        public const byte IsUTF8 = 0x00;
-        public const byte IsUTF16 = 0x10;
-        public const byte IsUTF32 = 0x20;
-        public const byte IsASCII = 0x30;
+        public const byte MaskCharEncoding = MaskValueSize;
+        public const byte IsUTF8 = Size8;
+        public const byte IsUTF16 = Size16;
+        public const byte IsUTF32 = Size32;
+        public const byte IsASCII = Size64;
 
-        public const byte Type_Byte = IsNumeric | Size8;
-        public const byte Type_Int16 = IsNumeric | Size16;
-        public const byte Type_Int32 = IsNumeric | Size32;
-        public const byte Type_Int64 = IsNumeric | Size64;
-        //  Characters
-        public const byte Type_CharASCII = IsCharacter | IsASCII;
-        public const byte Type_CharUTF8 = IsCharacter | IsUTF8;
-        //  Strings
-        public const byte Type_StringASCII = IsString | IsASCII;
-        public const byte Type_StringUTF = IsString | IsUTF8;
+        //  Enumeration
+        public const byte IsEnumSet = 0x10;
 
-        //  IsSpecial
-        //  - Currency
-        public const byte Currency = IsSpecial | IsInteger | Size64;
-        //  - Enumerations
-        public const byte IsEnum = IsSpecial | 0x08;
-        public const byte IsEnumSet = IsEnum | 0x40;
-        //  - Bool
-        public const byte IsBool = IsEnum | 0x80;
-        public const byte IsFalse = IsBool | 0x00;
-        public const byte IsTrue = IsBool | 0x40;
-        //  - IsWhen
-        public const byte IsWhen = IsSpecial | 0x0A;
-        public const byte IsTime = IsWhen | 0x10;
-        public const byte IsDate = IsWhen | 0x20;
-        public const byte IsDateTime = IsDate | IsTime;
+        public const byte MaskBool = 0x0C;
+        public const byte IsFalse = MaskBool;
+        public const byte IsTrue = MaskBool | 0x80;
 
-        static public bool TryEncode(MorphWriter writer, object value)
-            => Encode(writer, (dynamic)value);
+        //  Specific types
+        public const byte IsByte = IsInteger | Size8;
 
-        static private byte WriteValueSize(MorphWriter writer, int valueSize)
+        #endregion
+
+        #region Encoding
+
+        private readonly struct Encoders
         {
-            if (valueSize <= 0xFF)
+            public readonly EncodeSimpleType simpleTypeEncoder;
+            public readonly EncodeSimpleValue simpleValueEncoder;
+
+            public Encoders(EncodeSimpleType simpleTypeEncoder, EncodeSimpleValue simpleValueEncoder)
             {
-                writer.WriteInt8((byte)valueSize);
-                return Size8;
+                this.simpleTypeEncoder = simpleTypeEncoder;
+                this.simpleValueEncoder = simpleValueEncoder;
             }
-            if (valueSize <= 0xFFFF)
+        }
+
+        private static readonly Dictionary<Type, Encoders> simpleEncoders = new Dictionary<Type, Encoders>()
+        {
+            { typeof(bool), new Encoders(
+                delegate (MorphWriter writer) { writer.WriteInt8(IsFalse); },
+                delegate (MorphWriter writer, object value) { writer.WriteInt8((bool)value ? IsTrue : IsFalse); })},
+
+            { typeof(byte), new Encoders(
+                delegate (MorphWriter writer) { writer.WriteInt8(IsInteger | Size8); },
+                delegate (MorphWriter writer, object value) { writer.WriteInt8((byte)value); })},
+
+            { typeof(Int16), new Encoders(
+                delegate (MorphWriter writer) { writer.WriteInt8(IsInteger | Size16); },
+                delegate (MorphWriter writer, object value) { writer.WriteInt16((Int16)value); })},
+
+            { typeof(Int32), new Encoders(
+                delegate (MorphWriter writer) { writer.WriteInt8(IsInteger | Size32); },
+                delegate (MorphWriter writer, object value) { writer.WriteInt32((Int32)value); })},
+
+            { typeof(Int64), new Encoders(
+                delegate (MorphWriter writer) { writer.WriteInt8(IsInteger | Size64); },
+                delegate (MorphWriter writer, object value) { writer.WriteInt64((Int64)value); })},
+
+            { typeof(string), new Encoders(
+                delegate (MorphWriter writer) { writer.WriteInt8(IsString); },
+                delegate (MorphWriter writer, object value) { writer.WriteString((string)value); })},
+
+            { typeof(DateTime), new Encoders(
+                delegate (MorphWriter writer) { writer.WriteInt8(IsWhen); },
+                delegate (MorphWriter writer, object value)
+                {
+                    DateTime when = (DateTime)value;
+                    string timeZone = when.Kind == DateTimeKind.Utc ? "Z" : null;
+                    byte[] bytes = Encoding.UTF8.GetBytes(string.Concat(when.ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss"), timeZone));
+                    writer.WriteInt8((byte)bytes.Length);
+                    writer.WriteBytes(bytes);
+                })},
+
+            //{ typeof(qwerty), new Encoders(
+            //    qwerty,
+            //    qwertyu)},
+            //
+        };
+
+        static public bool CanEncode(Type type, out EncodeSimpleType typeEncoder, out EncodeSimpleValue valueEncoder)
+        {
+            if (simpleEncoders.TryGetValue(type, out Encoders encoders))
             {
-                writer.WriteInt16((short)valueSize);
-                return Size16;
+                typeEncoder = encoders.simpleTypeEncoder;
+                valueEncoder = encoders.simpleValueEncoder;
+                return true;
             }
-            writer.WriteInt32((int)valueSize);
-            return Size32;
-            //  Note: This implementation does not support strings with length greater than 2^2^32...
-            //  which is quite reasonable for the forseeable future.
+            else
+            {
+                typeEncoder = null;
+                valueEncoder = null;
+                return false;
+            }
         }
 
-        static private bool Encode(MorphWriter writer, object value)
-        {
-            return false;
-        }
-
-        static private bool Encode(MorphWriter writer, bool value)
-        {
-            writer.WriteInt8(value ? IsTrue : IsFalse);
-            return true;
-        }
-
-        static private bool Encode(MorphWriter writer, byte value)
-        {
-            writer.WriteInt8(Type_Byte);
-            writer.WriteInt8(value);
-            return true;
-        }
-
-        static private bool Encode(MorphWriter writer, Int16 value)
-        {
-            writer.WriteInt8(Type_Int16);
-            writer.WriteInt16(value);
-            return true;
-        }
-
-        static private bool Encode(MorphWriter writer, Int32 value)
-        {
-            writer.WriteInt8(Type_Int32);
-            writer.WriteInt32(value);
-            return true;
-        }
-
-        static private bool Encode(MorphWriter writer, Int64 value)
-        {
-            writer.WriteInt8(Type_Int64);
-            writer.WriteInt64(value);
-            return true;
-        }
-
-        static private bool Encode(MorphWriter writer, string value)
-        {
-            var simpleBytePos = writer.Stream.Position;
-            byte[] bytes = Encoding.UTF8.GetBytes(value);
-            writer.InsertInt8AtPosition((byte)(IsString | WriteValueSize(writer, bytes.Length)), simpleBytePos);
-            writer.WriteBytes(bytes);
-            return true;
-        }
+        #endregion
     }
 
 }
