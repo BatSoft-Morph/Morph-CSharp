@@ -53,13 +53,13 @@ namespace Morph.Params
 
         private readonly struct Encoders
         {
-            public readonly EncodeSimpleType simpleTypeEncoder;
-            public readonly EncodeSimpleValue simpleValueEncoder;
+            public readonly EncodeSimpleType typeEncoder;
+            public readonly EncodeSimpleValue valueEncoder;
 
             public Encoders(EncodeSimpleType simpleTypeEncoder, EncodeSimpleValue simpleValueEncoder)
             {
-                this.simpleTypeEncoder = simpleTypeEncoder;
-                this.simpleValueEncoder = simpleValueEncoder;
+                this.typeEncoder = simpleTypeEncoder;
+                this.valueEncoder = simpleValueEncoder;
             }
         }
 
@@ -110,8 +110,8 @@ namespace Morph.Params
         {
             if (simpleEncoders.TryGetValue(type, out Encoders encoders))
             {
-                typeEncoder = encoders.simpleTypeEncoder;
-                valueEncoder = encoders.simpleValueEncoder;
+                typeEncoder = encoders.typeEncoder;
+                valueEncoder = encoders.valueEncoder;
                 return true;
             }
             else

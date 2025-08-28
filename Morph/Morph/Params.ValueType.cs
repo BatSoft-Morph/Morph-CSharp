@@ -41,30 +41,26 @@ namespace Morph.Params
 
         #region Encoding
 
-        static public void EncodeValue(MorphWriter writer, bool writeValue, object value)
-            => Encode(writer, true, value, null);
+        static public void Encode(MorphWriter writer, bool encodeValue, object value)
+            => Encode(writer, ref encodeValue, value, null);
 
-        static public void EncodeValue(MorphWriter writer, bool writeValue, object value, string name)
-            => Encode(writer, true, value, name);
+        static public void Encode(MorphWriter writer, bool encodeValue, object value, string name)
+            => Encode(writer, ref encodeValue, value, name);
 
-        static public void WriteValueType(MorphWriter writer, object value)
-            => Encode(writer, false, value, null);
-
-        static public void WriteValueType(MorphWriter writer, object value, string name)
-            => Encode(writer, false, value, name);
-
-        static private void Encode(MorphWriter writer, bool writeValue, object value, string name)
+        static private void Encode(MorphWriter writer, ref bool encodeValue, object value, string name)
         {
             //  Begin encoding the value
             byte valueType = 0;
-            //  Has name
+            //  Has value name
             if (!string.IsNullOrEmpty(name))
             {
                 valueType |= ValueType.HasValueName;
                 writer.WriteIdentifier(name);
             }
+            //  Has type name
+            //  <Not implemented>
             //  IsNull
-            if (value == null && writeValue)
+            if (value == null && encodeValue)
             {
                 WriteByte(writer, valueType | ValueType.IsNull);
                 return;
@@ -75,7 +71,8 @@ namespace Morph.Params
             {
                 WriteByte(writer, IsSimpleType);
                 typeEncoder(writer);
-                valueEncoder(writer, value);
+                if (encodeValue)
+                    valueEncoder(writer, value);
             }
             else
             {
@@ -94,7 +91,7 @@ namespace Morph.Params
         static private void EncodeArray(MorphWriter writer, byte valueType, Type type, Array array)
         {
             valueType |= ValueType.IsArray;
-            //  Byte array is so common and optimisable, so we do a special here.
+            //  Byte array is so common and optimisable, that here we do a special implementation.
             if (array is byte[] bytes)
             {
                 WriteByte(writer, valueType | IsArrayElemType);
@@ -120,7 +117,7 @@ namespace Morph.Params
                 WriteByte(writer, valueType);
                 writer.WriteInt32(array.Length);
                 foreach (var value in array)
-                    ValueType.EncodeValue(writer, true, value);
+                    ValueType.Encode(writer, true, value);
                 return;
             }
         }

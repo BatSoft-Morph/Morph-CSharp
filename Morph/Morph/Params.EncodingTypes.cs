@@ -22,7 +22,7 @@ namespace Morph.Params
     /// where a proxy to the object will be created.</para>
     /// <para>The property MorphServlet provides a shortcut to the servlet that 
     /// represents this business object.  If this business object is referenced
-    /// from several apartments (and thus a servlet in each of those apartments)
+    /// from several apartments (and is thus a servlet in each of those apartments)
     /// then this interface may not be the best option.</para>
     /// <para><b>Note:</b> The class MorphReference is a convenience class that does most of the work.</para>
     /// <para>On the receiving end use IReferenceFactory to create servlet proxies

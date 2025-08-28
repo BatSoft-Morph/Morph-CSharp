@@ -28,9 +28,9 @@ namespace Morph.Params
             //  Write each param
             if (Params != null)
                 foreach (object obj in Params)
-                    ValueType.EncodeValue(writer, true, obj);
+                    ValueType.Encode(writer, true, obj);
             //  Write the "special" param (ie. return value, property value)
-            ValueType.EncodeValue(writer, true, special);
+            ValueType.Encode(writer, true, special);
             //  Return the data
             stream.Close();
             return writer;

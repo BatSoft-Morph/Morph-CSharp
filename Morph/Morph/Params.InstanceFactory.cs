@@ -22,81 +22,74 @@ using Morph.Endpoint;
 
 namespace Morph.Params
 {
-    /** IReferenceDecoder
-     * 
-     * An IReferenceFactory creates a business object proxy to encapsulate a servlet.
-     * 
-     * Example:
-     *   public class MyInterfaceProxy : MyInterface
-     *   {
-     *     internal MyInterfaceProxy(ServletProxy ServletProxy)
-     *     {
-     *       _ServletProxy = ServletProxy;
-     *     }
-     * 
-     *     private ServletProxy _ServletProxy;
-     * 
-     *     #region MyInterface Members
-     * 
-     *     public AnyType1 myMethod1(AnyType2 anyParam2, AnyType3 anyParam3)
-     *     {
-     *       return (AnyType1)_ServletProxy.CallMethod("myMethod1", new object[1] { anyParam2, anyParam3 });
-     *     }
-     * 
-     *     public AnyType3 myProperty1
-     *     {
-     *       get { return (AnyType3)_ServletProxy.CallGetProperty("myProperty1", null); }
-     *     }
-     * 
-     *     #endregion
-     *   }
-     */
+    /// <summary>
+    /// <para>An IReferenceFactory creates a business object proxy to encapsulate a servlet.</para>
+    /// <example>Example:
+    /// <code>
+    ///  public class MyInterfaceProxy : MyInterface
+    ///  {
+    ///    internal MyInterfaceProxy(ServletProxy ServletProxy)
+    ///    {
+    ///      _ServletProxy = ServletProxy;
+    ///    }
+    /// 
+    ///    private ServletProxy _ServletProxy;
+    /// 
+    ///    #region MyInterface Members
+    /// 
+    ///    public AnyType1 myMethod1(AnyType2 anyParam2, AnyType3 anyParam3)
+    ///    {
+    ///      return (AnyType1)_ServletProxy.CallMethod("myMethod1", new object[1] { anyParam2, anyParam3 });
+    ///    }
+    /// 
+    ///    public AnyType3 myProperty1
+    ///    {
+    ///      get { return (AnyType3)_ServletProxy.CallGetProperty("myProperty1", null); }
+    ///    }
+    /// 
+    ///    #endregion
+    ///  }
+    /// </code></example>
+    /// </summary>
     public interface IReferenceDecoder
     {
         bool DecodeReference(ServletProxy value, out object reference);
     }
 
-    /** IInstanceEncoder
-     * 
-     * Tries to encode Instance to ValueInstance.  If not, then returns null.
-     * 
-     * This is similar to IMorphInstance.  The only difference is that with this
-     * the Instance object can be of any type, even a finalised type.
-     */
+    /// <summary>
+    /// <para>Tries to encode Instance to ValueInstance.  If not, then returns null.</para>
+    /// <para>This is similar to IMorphInstance.  The only difference is that with this
+    ///  the Instance object can be of any type, even a finalised type.</para>
+    /// </summary>
     public interface IInstanceEncoder
     {
         ValueInstance EncodeInstance(object instance);
     }
 
-    /** IInstanceDecoder
-     * 
-     * An IInstanceFactory creates an instance based on the supplied Value.
-     * 
-     * This is really the inverse of IMorphInstance.  A complex object can
-     * encode itself using IMorphInstance.MorphEncode(), then on the
-     * receiving side, an IInstanceFactory can convert the ValueInstance
-     * back to the object as desired.
-     * 
-     */
+    /// <summary>
+    /// <para>An IInstanceFactory creates an instance based on the supplied Value.</para>
+    /// <para>This is really the inverse of IMorphInstance.  A complex object can
+    ///  encode itself using IMorphInstance.MorphEncode(), then on the
+    ///  receiving side, an IInstanceFactory can convert the ValueInstance
+    ///  back to the object as desired.</para>
+    /// </summary>
     public interface IInstanceDecoder
     {
         bool DecodeInstance(ValueInstance value, out object instance);
     }
 
-    /** ISimpleFactory
-     * 
-     * A simple factory has the same purpose as IInstanceFactory, except that
-     * the Value parameter is limited to the following simple types:
-     * - Int8 (Value)
-     * - Int16
-     * - Int32
-     * - Int64
-     * - Char
-     * - String
-     * - array of any of the above types.
-     * 
-     * For examples, see the implementations of predefined types.
-     */
+    /// <summary>
+    /// <para>A simple factory has the same purpose as IInstanceFactory,<br/>
+    /// except that the Value parameter is limited to the following simple types:<br/>
+    /// - Int8 (Value)<br/>
+    /// - Int16<br/>
+    /// - Int32<br/>
+    /// - Int64<br/>
+    /// - Char<br/>
+    /// - String<br/>
+    /// - array of any of the above types.</para>
+    /// <para>For examples, see the implementations of predefined types.</para>
+    /// </summary>
     public interface ISimpleFactory
     {
         bool EncodeSimple(out object value, out string typeName, object instance);
@@ -105,19 +98,17 @@ namespace Morph.Params
 
     #region Useful general implementations
 
-    /**
-     * This is meant to be commonly used for handling struct types automatically.
-     * Add the struct types using AddStructType() and add to an InstanceFactories.
-     * 
-     * Note:  This is intended to work only for struct types.  However, it also works
-     * for class types that look like structs.  This means having:
-     * - a contructor without parameters
-     * - fields (InstanceFactoryStruct ignores properties)
-     * 
-     * Examples:
-     *  AddStructType(typeof(MyStruct));
-     *  AddStructType(typeof(MyClass));
-     */
+    /// <summary>
+    ///  <para>This is meant to be commonly used for handling struct types automatically.<br/>
+    ///  Add the struct types using AddStructType() and add to an InstanceFactories.</para>
+    ///  <para>Note:  This is intended to work only for struct types.  However, it also works
+    ///  for class types that look like structs.  This means having:<br/>
+    ///  - a contructor without parameters<br/>
+    ///  - fields (InstanceFactoryStruct ignores properties)</para>
+    ///  <para>Examples:<br/>
+    ///   <c>AddStructType(typeof(MyStruct));</c><br/>
+    ///   <c>AddStructType(typeof(MyClass));</c></para>
+    /// </summary>
     public class InstanceFactoryStruct : IInstanceDecoder
     {
         #region Private
@@ -166,15 +157,13 @@ namespace Morph.Params
         #endregion
     }
 
-    /**
-     * 
-     * This is meant to be commonly used for handling array types automatically.
-     * Add the array element type using AddArrayElemType() and add to an InstanceFactories.
-     * 
-     * Examples:
-     *  AddArrayElemType(typeof(int));  //  Converts to int[]
-     *  AddArrayElemType(typeof(MyClass));  //  Converts to MyClass[]
-     */
+    /// <summary>
+    ///  <para>This is meant to be commonly used for handling array types automatically.<br/>
+    ///  Add the array element type using AddArrayElemType() and add to an InstanceFactories.</para>
+    ///  <example>Examples:<br/>
+    ///   <c>AddArrayElemType(typeof(int));  //  Converts to int[]</c><br/>
+    ///   <c>AddArrayElemType(typeof(MyClass));  //  Converts to MyClass[]</c></example>
+    /// </summary>
     public class InstanceFactoryArray : IInstanceDecoder
     {
         #region Private
@@ -236,9 +225,9 @@ namespace Morph.Params
         public bool EncodeSimple(out object value, out string typeName, object instance)
         {
             typeName = TypeNameBool;
-            if (instance is Boolean)
+            if (instance is Boolean isTrue)
             {
-                if ((Boolean)instance)
+                if (isTrue)
                     value = True; //  True as Byte 
                 else
                     value = False; //  False as Byte 
@@ -277,9 +266,9 @@ namespace Morph.Params
         public bool EncodeSimple(out object value, out string typeName, object instance)
         {
             typeName = TypeNameDateTime;
-            if (instance is DateTime)
+            if (instance is DateTime when)
             {
-                value = Morph.Lib.Conversion.DateTimeToStr((DateTime)instance);
+                value = Morph.Lib.Conversion.DateTimeToStr(when);
                 return true;
             }
             else
@@ -348,12 +337,11 @@ namespace Morph.Params
 
     #endregion
 
-    /** InstanceFactories
-     * 
-     * InstanceFactories loops through all factories of a certain type until either:
-     * - there are no factories left to try
-     * - a factory returns true, meaning that a conversion was successfully dealt with.
-     */
+    /// <summary>
+    ///  InstanceFactories loops through all factories of a certain type until either:<br/>
+    ///  - there are no factories left to try<br/>
+    ///  - a factory returns true, meaning that a conversion was successfully dealt with.
+    /// </summary>
     public class InstanceFactories
     {
         public InstanceFactories()
@@ -463,18 +451,17 @@ namespace Morph.Params
         }
     }
 
-    /** IMorphParameters
-     * 
-     * Add this to any server side business object to insert the LinkMessage as the 1st parameter.
-     * Other than that, the methods are called as usual.
-     * 
-     * Example:
-     *  The recieving business object implements IMorphParameters, so...
-     *  the caller calls:       void MyMethod(string Str, int Num)
-     *  the invoked method is:  void MyMethod(LinkMessage Message, string Str, int Num)
-     * 
-     * Note: This only applies to methods, not properties.
-     */
+    /// <summary>
+    ///  <para>Add this to any server side business object to insert the LinkMessage as the 1st parameter.<br/>
+    ///  Other than that, the methods are called as usual.</para>
+    ///  <para>
+    ///  Example:<br/>
+    ///   The recieving business object implements IMorphParameters, so...<br/>
+    ///   the caller calls:       <c>void MyMethod(string Str, int Num)</c><br/>
+    ///   the invoked method is:  <c>void MyMethod(LinkMessage Message, string Str, int Num)</c></para>
+    ///  
+    ///  <para>Note: This only applies to methods, not properties.</para>
+    /// </summary>
     public interface IMorphParameters
     {
     }
