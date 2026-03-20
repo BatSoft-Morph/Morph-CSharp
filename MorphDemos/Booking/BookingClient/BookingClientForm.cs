@@ -15,7 +15,7 @@ namespace MorphDemoBookingClient
       try
       {
         MorphManager.Startup(5);
-        MorphManager.ReplyTimeout = new TimeSpan(0, 20, 0);
+        MorphManager.ReplyTimeout = new TimeSpan(0, 0, 20);
         MorphApartment apartment = new MorphApartmentShared(new InstanceFactories());
         _bookingClient = new BookingDiplomatClientImpl(apartment, this);
       }

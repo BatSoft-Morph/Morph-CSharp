@@ -46,30 +46,28 @@ namespace Morph.Params
 
         #region Encoding
 
-        static public MorphWriter Encode(object[] Params, InstanceFactories instanceFactories)
+        static public MorphWriter Encode(object[] values, InstanceFactories instanceFactories)
         {
-            if (Params == null)
+            if (values == null)
                 return null;
-            return Encode(Params, null, instanceFactories);
-        }
-
-        static public MorphWriter Encode(object[] Params, object special, InstanceFactories instanceFactories)
-        {
-            int paramCount = 1 + (Params == null ? 0 : Params.Length);
             MemoryStream stream = new MemoryStream();
             MorphWriter writer = new MorphWriter(stream);
             //  Write the param count
-            writer.WriteInt32(paramCount);
-            //  Write the "special" param (ie. return value, property value)
-            EncodeValueAndValueByte(writer, instanceFactories, null, special);
+            writer.WriteInt32(values.Length);
             //  Write each param
-            if (Params != null)
-                foreach (object obj in Params)
-                    EncodeValueAndValueByte(writer, instanceFactories, null, obj);
+            if (values != null)
+                foreach (object value in values)
+                    EncodeValueAndValueByte(writer, instanceFactories, null, value);
             //  Return the data
             stream.Close();
             return writer;
         }
+
+        static public MorphWriter Encode(object[] values, object special, InstanceFactories instanceFactories)
+            => Encode(new List<object>(values) { special }.ToArray(), instanceFactories);
+
+        static public MorphWriter Encode(object special, InstanceFactories instanceFactories)
+            => Encode(new object[] { special }, instanceFactories);
 
         private static void InsertInt8AtPosition(MorphWriter writer, long position, byte value)
         {
@@ -130,7 +128,7 @@ namespace Morph.Params
                     writer.WriteIdentifier(typeName);
                 }
             //  Simple
-            if (EncodeSimple(writer, value, ref valueType))
+            if (SimpleType.Encode(writer, value, true, true))//  EncodeSimple(writer, value, ref valueType))
                 return valueType;
             //  HasTypeName
             if ((value is ValueObject) && (((ValueObject)value).TypeName != null))
@@ -181,102 +179,102 @@ namespace Morph.Params
             throw new EMorph("Encryption of parameter type " + value.GetType().FullName + " is not implemented.");
         }
 
-        static private bool EncodeSimple(MorphWriter writer, object value, ref byte valueType)
-        {
-            if (value is Array valueArray)
-            {
-                if (value is Byte[])
-                {
-                    writer.WriteInt8(0x0A); //  SimpleType
-                    writer.WriteInt32(valueArray.Length);
-                    writer.WriteBytes((Byte[])value);
-                    return true;
-                }
-                if (value is Int16[])
-                {
-                    writer.WriteInt8(0x4A); //  SimpleType
-                    writer.WriteInt32(valueArray.Length);
-                    Int16[] array = (Int16[])value;
-                    for (int i = 0; i < array.Length; i++)
-                        writer.WriteInt16(array[i]);
-                    return true;
-                }
-                if (value is Int32[])
-                {
-                    writer.WriteInt8(0x8A); //  SimpleType
-                    writer.WriteInt32(valueArray.Length);
-                    Int32[] array = (Int32[])value;
-                    for (int i = 0; i < array.Length; i++)
-                        writer.WriteInt32(array[i]);
-                    return true;
-                }
-                if (value is Int64[])
-                {
-                    writer.WriteInt8(0xCa); //  SimpleType
-                    writer.WriteInt32(valueArray.Length);
-                    Int64[] array = (Int64[])value;
-                    for (int i = 0; i < array.Length; i++)
-                        writer.WriteInt64(array[i]);
-                    return true;
-                }
-                if (value is Char[])
-                {
-                    writer.WriteInt8(0x1B); //  SimpleType
-                    writer.WriteInt32(valueArray.Length);
-                    Char[] array = (Char[])value;
-                    for (int i = 0; i < array.Length; i++)
-                        writer.WriteInt16(array[i]);
-                    return true;
-                }
-                if (value is String[])
-                {
-                    writer.WriteInt8(0xBB); //  SimpleType
-                    writer.WriteInt32(valueArray.Length);
-                    String[] array = (String[])value;
-                    for (int i = 0; i < array.Length; i++)
-                        writer.WriteString(array[i]);
-                    return true;
-                }
-            }
-            //  Not array...
-            if (value is Byte)
-            {
-                writer.WriteInt8(0x00); //  SimpleType
-                writer.WriteInt8((Byte)value);
-                return true;
-            }
-            if (value is Int16)
-            {
-                writer.WriteInt8(0x40); //  SimpleType
-                writer.WriteInt16((Int16)value);
-                return true;
-            }
-            if (value is Int32)
-            {
-                writer.WriteInt8(0x80); //  SimpleType
-                writer.WriteInt32((Int32)value);
-                return true;
-            }
-            if (value is Int64)
-            {
-                writer.WriteInt8(0xC0); //  SimpleType
-                writer.WriteInt64((Int64)value);
-                return true;
-            }
-            if (value is Char)
-            {
-                writer.WriteInt8(0x11); //  SimpleType
-                writer.WriteInt16((Int16)((Char)value));
-                return true;
-            }
-            if (value is String)
-            {
-                writer.WriteInt8(0xB1); //  SimpleType
-                writer.WriteString((String)value);
-                return true;
-            }
-            return false;
-        }
+        //static private bool EncodeSimple(MorphWriter writer, object value, ref byte valueType)
+        //{
+        //    if (value is Array valueArray)
+        //    {
+        //        if (value is Byte[])
+        //        {
+        //            writer.WriteInt8(0x0A); //  SimpleType
+        //            writer.WriteInt32(valueArray.Length);
+        //            writer.WriteBytes((Byte[])value);
+        //            return true;
+        //        }
+        //        if (value is Int16[])
+        //        {
+        //            writer.WriteInt8(0x4A); //  SimpleType
+        //            writer.WriteInt32(valueArray.Length);
+        //            Int16[] array = (Int16[])value;
+        //            for (int i = 0; i < array.Length; i++)
+        //                writer.WriteInt16(array[i]);
+        //            return true;
+        //        }
+        //        if (value is Int32[])
+        //        {
+        //            writer.WriteInt8(0x8A); //  SimpleType
+        //            writer.WriteInt32(valueArray.Length);
+        //            Int32[] array = (Int32[])value;
+        //            for (int i = 0; i < array.Length; i++)
+        //                writer.WriteInt32(array[i]);
+        //            return true;
+        //        }
+        //        if (value is Int64[])
+        //        {
+        //            writer.WriteInt8(0xCa); //  SimpleType
+        //            writer.WriteInt32(valueArray.Length);
+        //            Int64[] array = (Int64[])value;
+        //            for (int i = 0; i < array.Length; i++)
+        //                writer.WriteInt64(array[i]);
+        //            return true;
+        //        }
+        //        if (value is Char[])
+        //        {
+        //            writer.WriteInt8(0x1B); //  SimpleType
+        //            writer.WriteInt32(valueArray.Length);
+        //            Char[] array = (Char[])value;
+        //            for (int i = 0; i < array.Length; i++)
+        //                writer.WriteInt16(array[i]);
+        //            return true;
+        //        }
+        //        if (value is String[])
+        //        {
+        //            writer.WriteInt8(0xBB); //  SimpleType
+        //            writer.WriteInt32(valueArray.Length);
+        //            String[] array = (String[])value;
+        //            for (int i = 0; i < array.Length; i++)
+        //                writer.WriteString(array[i]);
+        //            return true;
+        //        }
+        //    }
+        //    //  Not array...
+        //    if (value is Byte)
+        //    {
+        //        writer.WriteInt8(0x00); //  SimpleType
+        //        writer.WriteInt8((Byte)value);
+        //        return true;
+        //    }
+        //    if (value is Int16)
+        //    {
+        //        writer.WriteInt8(0x40); //  SimpleType
+        //        writer.WriteInt16((Int16)value);
+        //        return true;
+        //    }
+        //    if (value is Int32)
+        //    {
+        //        writer.WriteInt8(0x80); //  SimpleType
+        //        writer.WriteInt32((Int32)value);
+        //        return true;
+        //    }
+        //    if (value is Int64)
+        //    {
+        //        writer.WriteInt8(0xC0); //  SimpleType
+        //        writer.WriteInt64((Int64)value);
+        //        return true;
+        //    }
+        //    if (value is Char)
+        //    {
+        //        writer.WriteInt8(0x11); //  SimpleType
+        //        writer.WriteInt16((Int16)((Char)value));
+        //        return true;
+        //    }
+        //    if (value is String)
+        //    {
+        //        writer.WriteInt8(0xB1); //  SimpleType
+        //        writer.WriteString((String)value);
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
         static private byte EncodeServlet(MorphWriter writer, object value)
         {
@@ -382,24 +380,21 @@ namespace Morph.Params
 
         #region Decoding
 
-        static public void Decode(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader dataReader, out object[] Params, out object special)
+        static public void Decode(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader dataReader, out object[] Params)
         {
             if ((dataReader == null) || !dataReader.CanRead)
             {
                 Params = null;
-                special = null;
                 return;
             }
             //  Param count
             int paramCount = dataReader.ReadInt32() - 1;
-            //  Read in special
-            special = DecodeValue(instanceFactories, devicePath, dataReader, out string Name);
             //  Read in parameters
             if (paramCount > 0)
             {
                 Params = new object[paramCount];
                 for (int i = 0; i < Params.Length; i++)
-                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out Name);
+                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out string Name);
             }
             else
                 Params = null;
@@ -442,7 +437,7 @@ namespace Morph.Params
                 return value;
             }
             //  Is simple type
-            object simpleResult = DecodeSimple(reader, typeName);
+            object simpleResult = SimpleType.Decode(reader);
             instanceFactories.DecodeSimple(simpleResult, typeName, out simpleResult);
             return simpleResult;
         }
@@ -530,104 +525,104 @@ namespace Morph.Params
             return result;
         }
 
-        static private object DecodeSimple(MorphReader reader, string typeName)
-        {
-            byte simpleType = (byte)reader.ReadInt8();
-            bool isNumeric = (simpleType & SimpleType_IsCharacter) == 0;
-            bool isArray = (simpleType & SimpleType_IsArray) != 0;
-            //  Might need to read ArraySize
-            long ArraySize = 0;
-            if (isArray)
-                ArraySize = ReadCountAsInt64(reader, (simpleType & SimpleType_ArraySize) >> 2);
-            //  IsNumeric/IsCharacter
-            if (isNumeric)
-            #region IsNumeric
-            {
-                byte bytesPerValue = (byte)((simpleType & SimpleType_ValueSize) >> 6);
-                if (!isArray)
-                    //  Single ordinal value
-                    return ReadCount(reader, bytesPerValue);
-                else
-                { //  Array of ordinal values
-                    switch (bytesPerValue)
-                    {
-                        case 0: //  2^ByteCountSize = 1 = 8 bit
-                            {
-                                Byte[] result = new Byte[ArraySize];
-                                for (int i = 0; i < ArraySize; i++)
-                                    result[i] = (Byte)reader.ReadInt8();
-                                return result;
-                            }
-                        case 1: //  2^ByteCountSize = 2 = 16 bit
-                            {
-                                Int16[] result = new Int16[ArraySize];
-                                for (int i = 0; i < ArraySize; i++)
-                                    result[i] = (Int16)reader.ReadInt16();
-                                return result;
-                            }
-                        case 2: //  2^ByteCountSize = 4 = 32 bit
-                            {
-                                Int32[] result = new Int32[ArraySize];
-                                for (int i = 0; i < ArraySize; i++)
-                                    result[i] = (Int32)reader.ReadInt32();
-                                return result;
-                            }
-                        case 3: //  2^ByteCountSize = 8 = 64 bit
-                            {
-                                Int64[] result = new Int64[ArraySize];
-                                for (int i = 0; i < ArraySize; i++)
-                                    result[i] = (Int64)reader.ReadInt64();
-                                return result;
-                            }
-                    }
-                }
-            }
-            #endregion
-            else
-            #region IsCharacter
-            {
-                bool isUnicode = (simpleType & SimpleType_IsUnicode) != 0;
-                bool isString = (simpleType & SimpleType_IsString) != 0;
-                if (!isString)
-                    if (!isArray)
-                        //  Single character
-                        if (!isUnicode)
-                            return (Char)reader.ReadInt8(); //  ASCII
-                        else
-                            return (Char)reader.ReadInt16();  //  Unicode
-                    else
-                      //  Array of characters
-                      if (!isUnicode)
-                    { //  ASCII array
-                        Char[] result = new Char[ArraySize];
-                        for (int i = 0; i < ArraySize; i++)
-                            result[i] = (Char)reader.ReadInt8();
-                        return result;
-                    }
-                    else
-                    { //  Unicode array
-                        Char[] result = new Char[ArraySize];
-                        for (int i = 0; i < ArraySize; i++)
-                            result[i] = (Char)reader.ReadInt16();
-                        return result;
-                    }
-                else if (!isArray)
-                { //  Single string
-                    byte byteCountSize = (byte)((simpleType & SimpleType_StringLength) >> 6);
-                    return reader.ReadString(byteCountSize, isUnicode);
-                }
-                else
-                { //  Array of strings
-                    byte byteCountSize = (byte)((simpleType & SimpleType_StringLength) >> 6);
-                    string[] result = new String[ArraySize];
-                    for (int i = 0; i < ArraySize; i++)
-                        result[i] = reader.ReadString(byteCountSize, isUnicode);
-                    return result;
-                }
-            }
-            #endregion
-            throw new EMorph("Implementation error");
-        }
+        //static private object DecodeSimple(MorphReader reader, string typeName)
+        //{
+        //    byte simpleType = (byte)reader.ReadInt8();
+        //    bool isNumeric = (simpleType & SimpleType_IsCharacter) == 0;
+        //    bool isArray = (simpleType & SimpleType_IsArray) != 0;
+        //    //  Might need to read ArraySize
+        //    long ArraySize = 0;
+        //    if (isArray)
+        //        ArraySize = ReadCountAsInt64(reader, (simpleType & SimpleType_ArraySize) >> 2);
+        //    //  IsNumeric/IsCharacter
+        //    if (isNumeric)
+        //    #region IsNumeric
+        //    {
+        //        byte bytesPerValue = (byte)((simpleType & SimpleType_ValueSize) >> 6);
+        //        if (!isArray)
+        //            //  Single ordinal value
+        //            return ReadCount(reader, bytesPerValue);
+        //        else
+        //        { //  Array of ordinal values
+        //            switch (bytesPerValue)
+        //            {
+        //                case 0: //  2^ByteCountSize = 1 = 8 bit
+        //                    {
+        //                        Byte[] result = new Byte[ArraySize];
+        //                        for (int i = 0; i < ArraySize; i++)
+        //                            result[i] = (Byte)reader.ReadInt8();
+        //                        return result;
+        //                    }
+        //                case 1: //  2^ByteCountSize = 2 = 16 bit
+        //                    {
+        //                        Int16[] result = new Int16[ArraySize];
+        //                        for (int i = 0; i < ArraySize; i++)
+        //                            result[i] = (Int16)reader.ReadInt16();
+        //                        return result;
+        //                    }
+        //                case 2: //  2^ByteCountSize = 4 = 32 bit
+        //                    {
+        //                        Int32[] result = new Int32[ArraySize];
+        //                        for (int i = 0; i < ArraySize; i++)
+        //                            result[i] = (Int32)reader.ReadInt32();
+        //                        return result;
+        //                    }
+        //                case 3: //  2^ByteCountSize = 8 = 64 bit
+        //                    {
+        //                        Int64[] result = new Int64[ArraySize];
+        //                        for (int i = 0; i < ArraySize; i++)
+        //                            result[i] = (Int64)reader.ReadInt64();
+        //                        return result;
+        //                    }
+        //            }
+        //        }
+        //    }
+        //    #endregion
+        //    else
+        //    #region IsCharacter
+        //    {
+        //        bool isUnicode = (simpleType & SimpleType_IsUnicode) != 0;
+        //        bool isString = (simpleType & SimpleType_IsString) != 0;
+        //        if (!isString)
+        //            if (!isArray)
+        //                //  Single character
+        //                if (!isUnicode)
+        //                    return (Char)reader.ReadInt8(); //  ASCII
+        //                else
+        //                    return (Char)reader.ReadInt16();  //  Unicode
+        //            else
+        //              //  Array of characters
+        //              if (!isUnicode)
+        //            { //  ASCII array
+        //                Char[] result = new Char[ArraySize];
+        //                for (int i = 0; i < ArraySize; i++)
+        //                    result[i] = (Char)reader.ReadInt8();
+        //                return result;
+        //            }
+        //            else
+        //            { //  Unicode array
+        //                Char[] result = new Char[ArraySize];
+        //                for (int i = 0; i < ArraySize; i++)
+        //                    result[i] = (Char)reader.ReadInt16();
+        //                return result;
+        //            }
+        //        else if (!isArray)
+        //        { //  Single string
+        //            byte byteCountSize = (byte)((simpleType & SimpleType_StringLength) >> 6);
+        //            return reader.ReadString(byteCountSize, isUnicode);
+        //        }
+        //        else
+        //        { //  Array of strings
+        //            byte byteCountSize = (byte)((simpleType & SimpleType_StringLength) >> 6);
+        //            string[] result = new String[ArraySize];
+        //            for (int i = 0; i < ArraySize; i++)
+        //                result[i] = reader.ReadString(byteCountSize, isUnicode);
+        //            return result;
+        //        }
+        //    }
+        //    #endregion
+        //    throw new EMorph("Implementation error");
+        //}
 
         static private object ReadCount(MorphReader reader, int byteCount)
         {
