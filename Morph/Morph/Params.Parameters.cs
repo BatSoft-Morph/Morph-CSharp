@@ -46,7 +46,7 @@ namespace Morph.Params
 
         #region Encoding
 
-        static public MorphWriter Encode(object[] values, InstanceFactories instanceFactories)
+        static private MorphWriter Encode(object[] values, InstanceFactories instanceFactories)
         {
             if (values == null)
                 return null;
@@ -66,7 +66,7 @@ namespace Morph.Params
         static public MorphWriter Encode(object[] values, object special, InstanceFactories instanceFactories)
             => Encode(new List<object>(values) { special }.ToArray(), instanceFactories);
 
-        static public MorphWriter Encode(object special, InstanceFactories instanceFactories)
+        static private MorphWriter Encode(object special, InstanceFactories instanceFactories)
             => Encode(new object[] { special }, instanceFactories);
 
         private static void InsertInt8AtPosition(MorphWriter writer, long position, byte value)
@@ -380,11 +380,12 @@ namespace Morph.Params
 
         #region Decoding
 
-        static public void Decode(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader dataReader, out object[] Params)
+        static public void Decode(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader dataReader, out object[] Params, out object special)
         {
             if ((dataReader == null) || !dataReader.CanRead)
             {
                 Params = null;
+                special = null;
                 return;
             }
             //  Param count
@@ -394,10 +395,11 @@ namespace Morph.Params
             {
                 Params = new object[paramCount];
                 for (int i = 0; i < Params.Length; i++)
-                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out string Name);
+                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out string _);
             }
             else
                 Params = null;
+            special = DecodeValue(instanceFactories, devicePath, dataReader, out string _);
         }
 
         static private object DecodeValue(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader reader, out string valueName)
