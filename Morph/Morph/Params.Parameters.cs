@@ -29,35 +29,28 @@ namespace Morph.Params
 
         #endregion
 
-        #region SimpleType
-
-        private const byte SimpleType_IsCharacter = 0x01;
-        private const byte SimpleType_IsArray = 0x02;
-        private const byte SimpleType_ArraySize = 0x0C;
-        //  IsNumeric
-        private const byte SimpleType_IsFloat = 0x10;
-        private const byte SimpleType_ValueSize = 0xC0;
-        //  IsCharacter
-        private const byte SimpleType_IsUnicode = 0x10;
-        private const byte SimpleType_IsString = 0x20;
-        private const byte SimpleType_StringLength = 0xC0;
-
-        #endregion
-
         #region Encoding
 
-        static public MorphWriter Encode(object[] values, object special, InstanceFactories instanceFactories)
+        static public MorphWriter Encode(object[] Params, InstanceFactories instanceFactories)
         {
-            if (values == null)
+            if (Params == null)
                 return null;
+            return Encode(Params, null, instanceFactories);
+        }
+
+        static public MorphWriter Encode(object[] Params, object special, InstanceFactories instanceFactories)
+        {
+            int paramCount = 1 + (Params == null ? 0 : Params.Length);
             MemoryStream stream = new MemoryStream();
             MorphWriter writer = new MorphWriter(stream);
             //  Write the param count
-            writer.WriteInt32(values.Length);
+            writer.WriteInt32(paramCount);
+            //  Write the "special" param (ie. return value, property value)
+            EncodeValueAndValueByte(writer, instanceFactories, null, special);
             //  Write each param
-            if (values != null)
-                foreach (object value in values)
-                    EncodeValueAndValueByte(writer, instanceFactories, null, value);
+            if (Params != null)
+                foreach (object obj in Params)
+                    EncodeValueAndValueByte(writer, instanceFactories, null, obj);
             //  Return the data
             stream.Close();
             return writer;
@@ -287,16 +280,17 @@ namespace Morph.Params
             }
             //  Param count
             int paramCount = dataReader.ReadInt32() - 1;
+            //  Read in special
+            special = DecodeValue(instanceFactories, devicePath, dataReader, out string Name);
             //  Read in parameters
             if (paramCount > 0)
             {
                 Params = new object[paramCount];
                 for (int i = 0; i < Params.Length; i++)
-                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out string _);
+                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out Name);
             }
             else
                 Params = null;
-            special = DecodeValue(instanceFactories, devicePath, dataReader, out string _);
         }
 
         static private object DecodeValue(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader reader, out string valueName)
