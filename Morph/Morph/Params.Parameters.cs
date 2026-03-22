@@ -29,45 +29,32 @@ namespace Morph.Params
 
         #endregion
 
-        #region SimpleType
-
-        private const byte SimpleType_IsCharacter = 0x01;
-        private const byte SimpleType_IsArray = 0x02;
-        private const byte SimpleType_ArraySize = 0x0C;
-        //  IsNumeric
-        private const byte SimpleType_IsFloat = 0x10;
-        private const byte SimpleType_ValueSize = 0xC0;
-        //  IsCharacter
-        private const byte SimpleType_IsUnicode = 0x10;
-        private const byte SimpleType_IsString = 0x20;
-        private const byte SimpleType_StringLength = 0xC0;
-
-        #endregion
-
         #region Encoding
 
-        static private MorphWriter Encode(object[] values, InstanceFactories instanceFactories)
+        static public MorphWriter Encode(object[] Params, InstanceFactories instanceFactories)
         {
-            if (values == null)
+            if (Params == null)
                 return null;
+            return Encode(Params, null, instanceFactories);
+        }
+
+        static public MorphWriter Encode(object[] Params, object special, InstanceFactories instanceFactories)
+        {
+            int paramCount = 1 + (Params == null ? 0 : Params.Length);
             MemoryStream stream = new MemoryStream();
             MorphWriter writer = new MorphWriter(stream);
             //  Write the param count
-            writer.WriteInt32(values.Length);
+            writer.WriteInt32(paramCount);
+            //  Write the "special" param (ie. return value, property value)
+            EncodeValueAndValueByte(writer, instanceFactories, null, special);
             //  Write each param
-            if (values != null)
-                foreach (object value in values)
-                    EncodeValueAndValueByte(writer, instanceFactories, null, value);
+            if (Params != null)
+                foreach (object obj in Params)
+                    EncodeValueAndValueByte(writer, instanceFactories, null, obj);
             //  Return the data
             stream.Close();
             return writer;
         }
-
-        static public MorphWriter Encode(object[] values, object special, InstanceFactories instanceFactories)
-            => Encode(new List<object>(values) { special }.ToArray(), instanceFactories);
-
-        static private MorphWriter Encode(object special, InstanceFactories instanceFactories)
-            => Encode(new object[] { special }, instanceFactories);
 
         private static void InsertInt8AtPosition(MorphWriter writer, long position, byte value)
         {
@@ -178,103 +165,6 @@ namespace Morph.Params
             //  Default
             throw new EMorph("Encryption of parameter type " + value.GetType().FullName + " is not implemented.");
         }
-
-        //static private bool EncodeSimple(MorphWriter writer, object value, ref byte valueType)
-        //{
-        //    if (value is Array valueArray)
-        //    {
-        //        if (value is Byte[])
-        //        {
-        //            writer.WriteInt8(0x0A); //  SimpleType
-        //            writer.WriteInt32(valueArray.Length);
-        //            writer.WriteBytes((Byte[])value);
-        //            return true;
-        //        }
-        //        if (value is Int16[])
-        //        {
-        //            writer.WriteInt8(0x4A); //  SimpleType
-        //            writer.WriteInt32(valueArray.Length);
-        //            Int16[] array = (Int16[])value;
-        //            for (int i = 0; i < array.Length; i++)
-        //                writer.WriteInt16(array[i]);
-        //            return true;
-        //        }
-        //        if (value is Int32[])
-        //        {
-        //            writer.WriteInt8(0x8A); //  SimpleType
-        //            writer.WriteInt32(valueArray.Length);
-        //            Int32[] array = (Int32[])value;
-        //            for (int i = 0; i < array.Length; i++)
-        //                writer.WriteInt32(array[i]);
-        //            return true;
-        //        }
-        //        if (value is Int64[])
-        //        {
-        //            writer.WriteInt8(0xCa); //  SimpleType
-        //            writer.WriteInt32(valueArray.Length);
-        //            Int64[] array = (Int64[])value;
-        //            for (int i = 0; i < array.Length; i++)
-        //                writer.WriteInt64(array[i]);
-        //            return true;
-        //        }
-        //        if (value is Char[])
-        //        {
-        //            writer.WriteInt8(0x1B); //  SimpleType
-        //            writer.WriteInt32(valueArray.Length);
-        //            Char[] array = (Char[])value;
-        //            for (int i = 0; i < array.Length; i++)
-        //                writer.WriteInt16(array[i]);
-        //            return true;
-        //        }
-        //        if (value is String[])
-        //        {
-        //            writer.WriteInt8(0xBB); //  SimpleType
-        //            writer.WriteInt32(valueArray.Length);
-        //            String[] array = (String[])value;
-        //            for (int i = 0; i < array.Length; i++)
-        //                writer.WriteString(array[i]);
-        //            return true;
-        //        }
-        //    }
-        //    //  Not array...
-        //    if (value is Byte)
-        //    {
-        //        writer.WriteInt8(0x00); //  SimpleType
-        //        writer.WriteInt8((Byte)value);
-        //        return true;
-        //    }
-        //    if (value is Int16)
-        //    {
-        //        writer.WriteInt8(0x40); //  SimpleType
-        //        writer.WriteInt16((Int16)value);
-        //        return true;
-        //    }
-        //    if (value is Int32)
-        //    {
-        //        writer.WriteInt8(0x80); //  SimpleType
-        //        writer.WriteInt32((Int32)value);
-        //        return true;
-        //    }
-        //    if (value is Int64)
-        //    {
-        //        writer.WriteInt8(0xC0); //  SimpleType
-        //        writer.WriteInt64((Int64)value);
-        //        return true;
-        //    }
-        //    if (value is Char)
-        //    {
-        //        writer.WriteInt8(0x11); //  SimpleType
-        //        writer.WriteInt16((Int16)((Char)value));
-        //        return true;
-        //    }
-        //    if (value is String)
-        //    {
-        //        writer.WriteInt8(0xB1); //  SimpleType
-        //        writer.WriteString((String)value);
-        //        return true;
-        //    }
-        //    return false;
-        //}
 
         static private byte EncodeServlet(MorphWriter writer, object value)
         {
@@ -390,16 +280,17 @@ namespace Morph.Params
             }
             //  Param count
             int paramCount = dataReader.ReadInt32() - 1;
+            //  Read in special
+            special = DecodeValue(instanceFactories, devicePath, dataReader, out string Name);
             //  Read in parameters
             if (paramCount > 0)
             {
                 Params = new object[paramCount];
                 for (int i = 0; i < Params.Length; i++)
-                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out string _);
+                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out Name);
             }
             else
                 Params = null;
-            special = DecodeValue(instanceFactories, devicePath, dataReader, out string _);
         }
 
         static private object DecodeValue(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader reader, out string valueName)
