@@ -225,87 +225,6 @@ namespace Morph.Params
 
     #region Predefined types
 
-    internal class SimpleFactoryBool : ISimpleFactory
-    {
-        #region ISimpleFactory Members
-
-        private const string TypeNameBool = "Bool";
-        private const Byte True = 0xFF;
-        private const Byte False = 0x00;
-
-        public bool EncodeSimple(out object value, out string typeName, object instance)
-        {
-            typeName = TypeNameBool;
-            if (instance is Boolean)
-            {
-                if ((Boolean)instance)
-                    value = True; //  True as Byte 
-                else
-                    value = False; //  False as Byte 
-                return true;
-            }
-            else
-            {
-                value = null;
-                return false;
-            }
-        }
-
-        public bool DecodeSimple(object value, string typeName, out object instance)
-        {
-            if (TypeNameBool.Equals(typeName))
-            {
-                instance = (Byte)value != 0;
-                return true;
-            }
-            else
-            {
-                instance = null;
-                return false;
-            }
-        }
-
-        #endregion
-    }
-
-    internal class SimpleFactoryDateTime : ISimpleFactory
-    {
-        #region ISimpleFactory Members
-
-        private const string TypeNameDateTime = "DateTime";
-
-        public bool EncodeSimple(out object value, out string typeName, object instance)
-        {
-            typeName = TypeNameDateTime;
-            if (instance is DateTime)
-            {
-                value = Morph.Lib.Conversion.DateTimeToStr((DateTime)instance);
-                return true;
-            }
-            else
-            {
-                value = null;
-                return false;
-            }
-        }
-
-        public bool DecodeSimple(object value, string typeName, out object instance)
-        {
-            if ("DateTime".Equals(typeName))
-            {
-                instance = Morph.Lib.Conversion.StrToDateTime((String)value);
-                return true;
-            }
-            else
-            {
-                instance = null;
-                return false;
-            }
-        }
-
-        #endregion
-    }
-
     internal class SimpleFactoryNotSupported : ISimpleFactory
     {
         #region ISimpleFactory Members
@@ -358,8 +277,6 @@ namespace Morph.Params
     {
         public InstanceFactories()
         {
-            Add(FactoryBool);
-            Add(FactoryDateTime);
             Add(FactoryNotSupported);
             Add(EncoderException);
         }
@@ -369,8 +286,6 @@ namespace Morph.Params
         #region Predefined types
 
         //  Very common, so saving memory by instantiating them once and then using for all InstanceFactories
-        private static readonly ISimpleFactory FactoryBool = new SimpleFactoryBool();
-        private static readonly ISimpleFactory FactoryDateTime = new SimpleFactoryDateTime();
         private static readonly ISimpleFactory FactoryNotSupported = new SimpleFactoryNotSupported();
         private static readonly IInstanceEncoder EncoderException = new InstanceEncoderException();
 

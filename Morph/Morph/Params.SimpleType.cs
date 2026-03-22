@@ -5,14 +5,12 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Morph.Params
 {
-    /// <summary>
-    /// Known bug: This uses BitConverter, which does not know about MSB vs LSB.<br>The Morph reader/writer should be used instead.</br>
-    /// </summary>
     static public class SimpleType
     {
         #region Constants
@@ -53,20 +51,34 @@ namespace Morph.Params
         static private byte SimpleTypeByte(byte typeNibble, byte valueSize, bool isSigned, bool hasValue)
             => (byte)(typeNibble | valueSize | (byte)(isSigned ? IsSigned : 0) | (byte)(hasValue ? HasValue : 0));
 
+        #region Type conversion
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct ConverterUnion<T1, T2>
+        {
+            [FieldOffset(0)] public T1 value1;
+            [FieldOffset(0)] public T2 value2;
+        }
+
+        private static T2 ConvertNumber<T1, T2>(object value)
+            => new ConverterUnion<T1, T2> { value1 = (T1)value }.value2;
+
+        #endregion
+
         #region Encoding
 
         delegate void Encoder(MorphWriter writer, object value, bool encodeType, bool encodeValue);
-        delegate byte[] ConverterToBytes(object value);
+        delegate void ValueEncoder(MorphWriter writer, object value);
 
         static private readonly Dictionary<Type, Encoder> encoders = new Dictionary<Type, Encoder>();
 
         static private void RegisterEncoders()
         {
-            void AddEncoder(Type type, byte typeNibble, byte valueSize, bool isSigned, ConverterToBytes converter) =>
+            void AddEncoder(Type type, byte typeNibble, byte valueSize, bool isSigned, ValueEncoder valueEncoder) =>
                 encoders.Add(type, (writer, value, encodeType, encodeValue) =>
                 {
                     if (encodeType) writer.WriteInt8(SimpleTypeByte(typeNibble, valueSize, isSigned, encodeValue));
-                    if (encodeValue) writer.WriteBytes(converter(value));
+                    if (encodeValue) valueEncoder(writer, value);
                 });
 
             //  Boolean
@@ -75,38 +87,33 @@ namespace Morph.Params
                 writer.WriteInt8(TypeBoolean | (encodeValue ? HasValue : 0) | ((bool)value ? BoolTrue : BoolFalse));
             });
             //  Unsigned integers
-            AddEncoder(typeof(byte), TypeInteger, Size8Bit, false, (value) => BitConverter.GetBytes((byte)value));
-            AddEncoder(typeof(UInt16), TypeInteger, Size16Bit, false, (value) => BitConverter.GetBytes((UInt16)value));
-            AddEncoder(typeof(UInt32), TypeInteger, Size32Bit, false, (value) => BitConverter.GetBytes((UInt32)value));
-            AddEncoder(typeof(UInt64), TypeInteger, Size64Bit, false, (value) => BitConverter.GetBytes((UInt64)value));
+            AddEncoder(typeof(byte), TypeInteger, Size8Bit, false, (writer, value) => writer.WriteInt8((byte)value));
+            AddEncoder(typeof(UInt16), TypeInteger, Size16Bit, false, (writer, value) => writer.WriteInt16(ConvertNumber<UInt16, Int16>(value)));
+            AddEncoder(typeof(UInt32), TypeInteger, Size32Bit, false, (writer, value) => writer.WriteInt32(ConvertNumber<UInt32, Int32>(value)));
+            AddEncoder(typeof(UInt64), TypeInteger, Size64Bit, false, (writer, value) => writer.WriteInt64(ConvertNumber<UInt64, Int64>(value)));
             //  Signed integers
-            AddEncoder(typeof(sbyte), TypeInteger, Size8Bit, true, (value) => BitConverter.GetBytes((sbyte)value));
-            AddEncoder(typeof(Int16), TypeInteger, Size16Bit, true, (value) => BitConverter.GetBytes((Int16)value));
-            AddEncoder(typeof(Int32), TypeInteger, Size32Bit, true, (value) => BitConverter.GetBytes((Int32)value));
-            AddEncoder(typeof(Int64), TypeInteger, Size64Bit, true, (value) => BitConverter.GetBytes((Int64)value));
+            AddEncoder(typeof(sbyte), TypeInteger, Size8Bit, true, (writer, value) => writer.WriteInt8((sbyte)value));
+            AddEncoder(typeof(Int16), TypeInteger, Size16Bit, true, (writer, value) => writer.WriteInt16((Int16)value));
+            AddEncoder(typeof(Int32), TypeInteger, Size32Bit, true, (writer, value) => writer.WriteInt32((Int32)value));
+            AddEncoder(typeof(Int64), TypeInteger, Size64Bit, true, (writer, value) => writer.WriteInt64((Int64)value));
             //  Floating point
-            AddEncoder(typeof(float), TypeFloat, Size8Bit, true, (value) => BitConverter.GetBytes((float)value));
-            AddEncoder(typeof(double), TypeFloat, Size16Bit, true, (value) => BitConverter.GetBytes((double)value));
+            AddEncoder(typeof(float), TypeFloat, Size8Bit, true, (writer, value) => writer.WriteInt32(ConvertNumber<float, Int32>(value)));
+            AddEncoder(typeof(double), TypeFloat, Size16Bit, true, (writer, value) => writer.WriteInt64(ConvertNumber<double, Int64>(value)));
 
             //  Char
             //AddEncoder(typeof(char), TypeChar, Size16Bit, false, (value) => BitConverter.GetBytes((char)value));
             //  String
-            AddEncoder(typeof(string), TypeString, Size32Bit, false, (value) =>
-            {
-                byte[] buffer = Encoding.UTF8.GetBytes((string)value);
-                byte[] lengthPrefix = BitConverter.GetBytes(buffer.Length);
-                return lengthPrefix.Concat(buffer).ToArray();
-            });
+            AddEncoder(typeof(string), TypeString, Size32Bit, false, (writer, value) => writer.WriteString((string)value));
             //  Enumerations (Ordinal)
 
             //  Enumerations (String)
 
             //  When (String)
-            AddEncoder(typeof(DateTime), TypeWhenStr, WhenDateTime, false, (value) =>
+            AddEncoder(typeof(DateTime), TypeWhenStr, WhenDateTime, false, (writer, value) =>
             {
                 string whenStr = Conversion.DateTimeToStr((DateTime)value);
                 byte[] buffer = Encoding.UTF8.GetBytes(whenStr);
-                return buffer.Prepend((byte)buffer.Length).ToArray();
+                writer.WriteBytes(buffer.Prepend((byte)buffer.Length).ToArray());
             });
         }
 
@@ -148,27 +155,22 @@ namespace Morph.Params
             decoders.Add(TypeBoolean | BoolTrue, (reader, hasValue) => hasValue ? (object)true : typeof(bool));
             //  Unsigned integers
             AddDecoder(typeof(byte), TypeInteger, Size8Bit, false, (reader) => reader.ReadInt8());
-            AddDecoder(typeof(UInt16), TypeInteger, Size16Bit, false, (reader) => (UInt16)reader.ReadInt16());
-            AddDecoder(typeof(UInt32), TypeInteger, Size32Bit, false, (reader) => (UInt32)reader.ReadInt32());
-            AddDecoder(typeof(UInt64), TypeInteger, Size64Bit, false, (reader) => (UInt64)reader.ReadInt64());
+            AddDecoder(typeof(UInt16), TypeInteger, Size16Bit, false, (reader) => ConvertNumber<Int16, UInt16>(reader.ReadInt16()));
+            AddDecoder(typeof(UInt32), TypeInteger, Size32Bit, false, (reader) => ConvertNumber<Int32, UInt32>(reader.ReadInt32()));
+            AddDecoder(typeof(UInt64), TypeInteger, Size64Bit, false, (reader) => ConvertNumber<Int64, UInt64>(reader.ReadInt64()));
             //  Signed integers
             AddDecoder(typeof(sbyte), TypeInteger, Size8Bit, true, (reader) => reader.ReadInt8());
             AddDecoder(typeof(Int16), TypeInteger, Size16Bit, true, (reader) => reader.ReadInt16());
             AddDecoder(typeof(Int32), TypeInteger, Size32Bit, true, (reader) => reader.ReadInt32());
             AddDecoder(typeof(Int64), TypeInteger, Size64Bit, true, (reader) => reader.ReadInt64());
             //  Floating point
-            AddDecoder(typeof(float), TypeFloat, Size8Bit, true, (reader) => BitConverter.ToSingle(reader.ReadBytes(4), 0));
-            AddDecoder(typeof(double), TypeFloat, Size16Bit, true, (reader) => BitConverter.ToDouble(reader.ReadBytes(8), 0));
+            AddDecoder(typeof(float), TypeFloat, Size8Bit, true, (reader) => ConvertNumber<Int32, float>(reader.ReadInt32()));
+            AddDecoder(typeof(double), TypeFloat, Size16Bit, true, (reader) => ConvertNumber<Int64, double>(reader.ReadInt64()));
 
             //  Char
 
             //  String
-            AddDecoder(typeof(string), TypeString, Size32Bit, false, (reader) =>
-            {
-                int length = reader.ReadInt32();
-                byte[] buffer = reader.ReadBytes(length);
-                return Encoding.UTF8.GetString(buffer);
-            });
+            AddDecoder(typeof(string), TypeString, Size32Bit, false, (reader) => reader.ReadString());
             //  Enumerations (Ordinal)
 
             //  Enumerations (String)
