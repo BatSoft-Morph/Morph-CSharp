@@ -67,7 +67,7 @@ namespace Morph.Params
 
         #region Encoding
 
-        delegate void Encoder(MorphWriter writer, object value, bool encodeType, bool encodeValue);
+        public delegate void Encoder(MorphWriter writer, object value, bool encodeType, bool encodeValue);
         delegate void ValueEncoder(MorphWriter writer, object value);
 
         static private readonly Dictionary<Type, Encoder> encoders = new Dictionary<Type, Encoder>();
@@ -129,6 +129,9 @@ namespace Morph.Params
                 return false;
             //throw new EMorph(0, $"Unsupported simple type: {type.FullName}");
         }
+
+        static public bool GetEncoder(Type type, out Encoder encoder)
+            => encoders.TryGetValue(type, out encoder);
 
         #endregion
 

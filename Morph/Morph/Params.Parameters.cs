@@ -128,16 +128,24 @@ namespace Morph.Params
                 return;
             }
             //  Struct and array
-            //  - Default encoding
-            if (value is System.Array)
-                EncodeArray(writer, instanceFactories, value, valueName, encodeType, encodeValue);
-            if (value is System.Object)
-                EncodeStruct(writer, instanceFactories, value, valueName, encodeType, encodeValue);
             //  SimpleType
-            WriteValueType(writer, ValueType_IsValue | ValueType_IsSimpleType, valueName, null);
-            if (SimpleType.Encode(writer, value, encodeType, encodeValue))
+            if (SimpleType.GetEncoder(value.GetType(), out SimpleType.Encoder encoder))
+            {
+                WriteValueType(writer, ValueType_IsValue | ValueType_IsSimpleType, valueName, null);
+                encoder(writer, value, encodeType, encodeValue);
                 return;
-            //  Default
+            }
+            if (value is System.Array)
+            {
+                EncodeArray(writer, instanceFactories, value, valueName, encodeType, encodeValue);
+                return;
+            }
+            else
+            {
+                EncodeStruct(writer, instanceFactories, value, valueName, encodeType, encodeValue);
+                return;
+            }
+            //  Failed
             throw new EMorph("Encoding of parameter type " + value.GetType().FullName + " is not implemented.");
         }
 
