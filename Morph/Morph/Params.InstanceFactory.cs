@@ -65,7 +65,7 @@ namespace Morph.Params
      */
     public interface IInstanceEncoder
     {
-        ValueInstance EncodeInstance(object instance);
+        bool EncodeInstance(object value, ref ValueInstance valueInstance, ref string typeName);
     }
 
     /** IInstanceDecoder
@@ -225,41 +225,42 @@ namespace Morph.Params
 
     #region Predefined types
 
-    internal class SimpleFactoryNotSupported : ISimpleFactory
-    {
-        #region ISimpleFactory Members
+    //internal class SimpleFactoryNotSupported : ISimpleFactory
+    //{
+    //    #region ISimpleFactory Members
 
-        public bool EncodeSimple(out object value, out string typeName, object instance)
-        {
-            value = null;
-            typeName = null;
-            return false;
-        }
+    //    public bool EncodeSimple(out object value, out string typeName, object instance)
+    //    {
+    //        value = null;
+    //        typeName = null;
+    //        return false;
+    //    }
 
-        public bool DecodeSimple(object value, string typeName, out object instance)
-        {
-            if ("Date".Equals(typeName) || "Time".Equals(typeName) || "Currency".Equals(typeName))
-                throw new EMorph("The type " + typeName + " is not supported on this implementation.");
-            instance = null;
-            return false;
-        }
+    //    public bool DecodeSimple(object value, string typeName, out object instance)
+    //    {
+    //        if ("Date".Equals(typeName) || "Time".Equals(typeName) || "Currency".Equals(typeName))
+    //            throw new EMorph("The type " + typeName + " is not supported on this implementation.");
+    //        instance = null;
+    //        return false;
+    //    }
 
-        #endregion
-    }
+    //    #endregion
+    //}
 
     internal class InstanceEncoderException : IInstanceEncoder
     {
         #region IInstanceFactory
 
-        public ValueInstance EncodeInstance(object instance)
+        public bool EncodeInstance(object value, ref ValueInstance valueInstance, ref string typeName)
         {
-            if (!(instance is Exception))
-                return null;
-            Exception x = (Exception)instance;
-            ValueInstance value = new ValueInstance(instance.GetType().Name, true, false);
-            value.Struct.Add(x.Message, "message");
-            value.Struct.Add(x.StackTrace, "trace");
-            return value;
+            if (value is Exception x)
+            {
+                valueInstance = new ValueInstance(value.GetType().Name, true, false);
+                valueInstance.Struct.Add(x.Message, "message");
+                valueInstance.Struct.Add(x.StackTrace, "trace");
+                return true;
+            }
+            return false;
         }
 
         #endregion
@@ -277,7 +278,7 @@ namespace Morph.Params
     {
         public InstanceFactories()
         {
-            Add(FactoryNotSupported);
+            //Add(FactoryNotSupported);
             Add(EncoderException);
         }
 
@@ -286,7 +287,7 @@ namespace Morph.Params
         #region Predefined types
 
         //  Very common, so saving memory by instantiating them once and then using for all InstanceFactories
-        private static readonly ISimpleFactory FactoryNotSupported = new SimpleFactoryNotSupported();
+        //private static readonly ISimpleFactory FactoryNotSupported = new SimpleFactoryNotSupported();
         private static readonly IInstanceEncoder EncoderException = new InstanceEncoderException();
 
         #endregion
@@ -314,16 +315,15 @@ namespace Morph.Params
             return false;
         }
 
-        internal object EncodeInstance(object instance)
+        internal bool EncodeInstance(object value, ref ValueInstance result, out string typeName)
         {
+            result = null;
+            typeName = null;
+            //  Ensure we loop through the converters in order, in case order is important
             for (int i = 0; i < s_instanceEncoders.Count; i++)
-            {
-                ValueInstance result = s_instanceEncoders[i].EncodeInstance(instance);
-                //  We know that Instance is not null (because of where the params encoder calls this), so should not be encoded as null
-                if (result != null)
-                    return result;
-            }
-            return instance;
+                if (s_instanceEncoders[i].EncodeInstance(value, ref result, ref typeName))
+                    return true;
+            return false;
         }
 
         internal bool DecodeInstance(ValueInstance value, out object instance)
@@ -335,13 +335,13 @@ namespace Morph.Params
             return false;
         }
 
-        internal bool EncodeSimple(out object value, out string typeName, object instance)
+        internal bool EncodeSimple(out object value, out string typeName, object origValue)
         {
             for (int i = 0; i < s_simpleFactories.Count; i++)
-                if (s_simpleFactories[i].EncodeSimple(out value, out typeName, instance))
+                if (s_simpleFactories[i].EncodeSimple(out value, out typeName, origValue))
                     return true;
+            value = origValue;
             typeName = null;
-            value = instance;
             return false;
         }
 

@@ -134,21 +134,29 @@ namespace Morph.Params
 
         #region Decoding
 
-        delegate object Decoder(MorphReader reader, bool hasValue);
+        public delegate object Decoder(MorphReader reader, bool hasValue);
         delegate object ConverterFromBytes(MorphReader reader);
 
+        static private readonly Dictionary<byte, Type> types = new Dictionary<byte, Type>();
         static private readonly Dictionary<byte, Decoder> decoders = new Dictionary<byte, Decoder>();
 
         static private void RegisterDecoders()
         {
-            void AddDecoder(Type type, byte typeNibble, byte valueSize, bool isSigned, ConverterFromBytes converter) =>
-                decoders.Add(SimpleTypeByte(typeNibble, valueSize, isSigned, false), (reader, hasValue) =>
+            void AddDecoder(Type type, byte typeNibble, byte valueSize, bool isSigned, ConverterFromBytes converter)
+            {
+                byte simpleTypeByte = SimpleTypeByte(typeNibble, valueSize, isSigned, false);
+                //  Add to types
+                types.Add(simpleTypeByte, type);
+                //  Add to value decoders
+                decoders.Add(simpleTypeByte, (reader, hasValue) =>
                 {
                     if (hasValue)
                         return converter(reader);
                     else
                         return type;
                 });
+            }
+
 
             //  Boolean
             decoders.Add(TypeBoolean | BoolFalse, (reader, hasValue) => hasValue ? (object)false : typeof(bool));
@@ -183,6 +191,23 @@ namespace Morph.Params
                 string whenStr = Encoding.UTF8.GetString(buffer);
                 return Conversion.StrToDateTime(whenStr);
             });
+        }
+
+        static public Type DecodeType(MorphReader reader)
+        {
+            byte simpleType = reader.ReadInt8();
+            simpleType = (byte)(simpleType & ~HasValue);
+            if (types.TryGetValue(simpleType, out Type type))
+                return type;
+            throw new EMorph(0, $"Unsupported simple type: {simpleType}");
+        }
+
+        static public Decoder GetDecoder(byte simpleType)
+        {
+            simpleType = (byte)(simpleType & ~HasValue);
+            if (decoders.TryGetValue(simpleType, out Decoder decoder))
+                return decoder;
+            throw new EMorph(0, $"Unsupported simple type: {simpleType}");
         }
 
         static public object Decode(MorphReader reader)
