@@ -7,8 +7,8 @@ namespace Morph.Core
     {
         public abstract MorphReaderSized SubReader(int count);
 
-        static protected Encoding ASCII = new ASCIIEncoding();
-        static protected Encoding Unicode = new UnicodeEncoding();
+        static protected Encoding ASCII = Encoding.ASCII;
+        static protected Encoding Unicode = Encoding.UTF8;
 
         private int ReadByteCount(byte byteCountSize)
         {

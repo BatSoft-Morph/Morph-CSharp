@@ -10,8 +10,8 @@ namespace Morph.Core
             _stream = stream;
         }
 
-        private static readonly Encoding ASCII = new ASCIIEncoding();
-        private static readonly Encoding Unicode = new UnicodeEncoding();
+        private static readonly Encoding ASCII = Encoding.ASCII;
+        private static readonly Encoding Unicode = Encoding.UTF8;
 
         private readonly MemoryStream _stream;
         private const int BufferSize = 256;

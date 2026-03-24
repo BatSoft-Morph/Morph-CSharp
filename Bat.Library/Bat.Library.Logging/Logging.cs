@@ -15,7 +15,7 @@ namespace Bat.Library.Logging
         public const string nl = "\u000D\u000A";
 
         public static Log Default = new Log(LogFileName());
-        private static readonly Encoding s_encoding = new UnicodeEncoding();
+        private static readonly Encoding s_encoding = Encoding.UTF8;
 
         private readonly string _fileName;
         public string FileName
