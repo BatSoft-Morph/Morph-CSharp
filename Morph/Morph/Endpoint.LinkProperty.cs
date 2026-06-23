@@ -60,20 +60,23 @@ namespace Morph.Endpoint
                     throw new EMorph("Property setter not found");
                 else
                     throw new EMorph("Property getter not found");
-            //  Decode input
-            object[] index = null;
-            object value = null;
-            if (dataIn != null)
-                Parameters.Decode(apartment.InstanceFactories, senderDevicePath, dataIn.Reader, out index, out value);
+            if (dataIn == null && IsSet)
+                throw new EMorphInvocation(property.Name, "Tried to set a property value without a value: " + property.Name, null);
             //  Invoke the property
             if (IsSet)
             {
+                //  Decode input
+                Parameters.Decode(apartment.InstanceFactories, senderDevicePath, dataIn.Reader, out object[] index, out object value);
+                //  Invoke the property
                 property.SetValue(obj, value, index);
                 return null;
             }
             else
             {
-                value = property.GetValue(obj, index);
+                //  Decode input
+                Parameters.Decode(apartment.InstanceFactories, senderDevicePath, dataIn.Reader, out object[] index);
+                //  Invoke the property
+                object value = property.GetValue(obj, index);
                 //  Encode output
                 return new LinkData(Parameters.Encode(null, value, apartment.InstanceFactories));
             }

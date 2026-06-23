@@ -53,7 +53,7 @@ namespace Morph.Endpoint
             AddReply(new ReplyParams(id, instanceFactories, device, fromPath, linkData));
         }
 
-        public object GetReply(int id, out object[] Params)
+        public object GetReply(int id, out object[] Params, bool hasSpecial)
         {
             //  Extract the Reply
             ReplyParams reply;
@@ -71,8 +71,11 @@ namespace Morph.Endpoint
                 return null;
             }
             //  Decode reply
-            object special;
-            Parameters.Decode(reply.InstanceFactories, reply.Device.Path, reply.LinkData.Reader, out Params, out special);
+            object special = null;
+            if (hasSpecial)
+                Parameters.Decode(reply.InstanceFactories, reply.Device.Path, reply.LinkData.Reader, out Params, out special);
+            else
+                Parameters.Decode(reply.InstanceFactories, reply.Device.Path, reply.LinkData.Reader, out Params);
             //  Reply might be an exception
             if (reply.LinkData.IsException)
             {

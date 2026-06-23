@@ -20,7 +20,7 @@ namespace Morph.Daemon.Client
             //  Try to register the service with the Morph Daemon
             try
             { //  Tell the Morph daemon to redirect service requests to here
-                ServletProxy.CallMethod("Start", new object[] { serviceName, accessLocal, accessRemote });
+                ServletProxy.CallMethod("Start", new object[] { serviceName, accessLocal, accessRemote }, false);
                 //  Done
                 return service;
             }
@@ -54,7 +54,7 @@ namespace Morph.Daemon.Client
         {
             try
             {
-                ServletProxy.CallMethod("Stop", new object[] { serviceName });
+                ServletProxy.CallMethod("Stop", new object[] { serviceName }, false);
             }
             finally
             {
@@ -66,7 +66,7 @@ namespace Morph.Daemon.Client
         {
             try
             {
-                ServletProxy.CallMethod("Stop", new object[] { service.Name });
+                ServletProxy.CallMethod("Stop", new object[] { service.Name }, false);
             }
             finally
             {
@@ -76,17 +76,17 @@ namespace Morph.Daemon.Client
 
         public DaemonService[] ListServices()
         {
-            return (DaemonService[])ServletProxy.CallMethod("ListServices", null);
+            return (DaemonService[])ServletProxy.CallMethod("ListServices", null, true);
         }
 
         public void Listen(DaemonServiceCallback callback)
         {
-            ServletProxy.CallMethod("Listen", new object[] { callback });
+            ServletProxy.CallMethod("Listen", new object[] { callback }, false);
         }
 
         public void Unlisten(DaemonServiceCallback callback)
         {
-            ServletProxy.CallMethod("Unlisten", new object[] { callback });
+            ServletProxy.CallMethod("Unlisten", new object[] { callback }, false);
         }
     }
 

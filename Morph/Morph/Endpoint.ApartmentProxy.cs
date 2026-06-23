@@ -105,8 +105,7 @@ namespace Morph.Endpoint
 
         private void EstablishConnection()
         {
-            object[] outParams;
-            Call(new LinkMessage(new LinkStack(), new LinkStack(), true), out outParams);
+            Call(new LinkMessage(new LinkStack(), new LinkStack(), true), out _, false);
         }
 
         private void EndConnection()
@@ -124,7 +123,7 @@ namespace Morph.Endpoint
             message.NextLinkAction();
         }
 
-        internal object Call(LinkMessage message, out object[] outParams)
+        internal object Call(LinkMessage message, out object[] outParams, bool hasReturnValue)
         {
             //  Call number
             int callNumber = _callNumberSeed.Generate();
@@ -146,7 +145,7 @@ namespace Morph.Endpoint
                 //  Wait for a response
                 if (_waits.Wait(callNumber, Timeout))
                     //  Received a reply
-                    return _replies.GetReply(callNumber, out outParams);
+                    return _replies.GetReply(callNumber, out outParams, hasReturnValue);
                 else
                     //  No reply
                     throw new EMorph("Timeout");

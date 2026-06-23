@@ -63,7 +63,7 @@ namespace Morph.Endpoint
             _apartmentProxy.Send(message);
         }
 
-        private object Call(LinkMember member, object special, object[] inParams, out object[] outParams)
+        private object Call(LinkMember member, object special, object[] inParams, out object[] outParams, bool hasReturnValue)
         {
             //  Determine if we need a path to the apartment in the reply
             LinkStack fromPath = null;
@@ -80,7 +80,7 @@ namespace Morph.Endpoint
             //  Sequence
             _apartmentProxy._sequenceSender?.AddNextLink(false, Message);
             //  Request/Response
-            return _apartmentProxy.Call(Message, out outParams);
+            return _apartmentProxy.Call(Message, out outParams, hasReturnValue);
         }
 
         #endregion
@@ -111,15 +111,14 @@ namespace Morph.Endpoint
             Send(new LinkMethod(methodName), null, inParams);
         }
 
-        public object CallMethod(string methodName, object[] inParams, out object[] outParams)
+        public object CallMethod(string methodName, object[] inParams, out object[] outParams, bool hasReturnValue)
         {
-            return Call(new LinkMethod(methodName), null, inParams, out outParams);
+            return Call(new LinkMethod(methodName), null, inParams, out outParams, hasReturnValue);
         }
 
-        public object CallMethod(string methodName, object[] inParams)
+        public object CallMethod(string methodName, object[] inParams, bool hasReturnValue)
         {
-            object[] noParams = null;
-            return CallMethod(methodName, inParams, out noParams);
+            return CallMethod(methodName, inParams, out _, hasReturnValue);
         }
 
         public void SendSetProperty(string propertyName, object value, object[] index)
@@ -129,12 +128,12 @@ namespace Morph.Endpoint
 
         public void CallSetProperty(string propertyName, object value, object[] index)
         {
-            Call(new LinkProperty(propertyName, true, index != null), value, index, out index);
+            Call(new LinkProperty(propertyName, true, index != null), value, index, out _, false);
         }
 
         public object CallGetProperty(string propertyName, object[] index)
         {
-            return Call(new LinkProperty(propertyName, false, index != null), null, index, out index);
+            return Call(new LinkProperty(propertyName, false, index != null), null, index, out _, true);
         }
 
         #endregion

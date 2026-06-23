@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
-using Morph.Base;
+﻿using Morph.Base;
 using Morph.Core;
 using Morph.Params;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Morph.Endpoint
 {
@@ -46,18 +46,15 @@ namespace Morph.Endpoint
                 throw new EMorph("Method not found");
             //  Decode input
             object[] paramsIn = null;
-            object special = null;
             if (dataIn != null)
-                Parameters.Decode(apartment.InstanceFactories, senderDevicePath, dataIn.Reader, out paramsIn, out special);
+                Parameters.Decode(apartment.InstanceFactories, senderDevicePath, dataIn.Reader, out paramsIn);
             //  Might insert Message as the first parameter
             if (obj is IMorphParameters)
             {
-                List<object> Params = new List<object>((paramsIn == null ? 0 : paramsIn.Length) + 1);
-                Params.Add(message);
+                List<object> paramsList = new List<object>() { message };
                 if (paramsIn != null)
-                    for (int i = 0; i < paramsIn.Length; i++)
-                        Params.Add(paramsIn[i]);
-                paramsIn = Params.ToArray();
+                    paramsList.AddRange(paramsIn);
+                paramsIn = paramsList.ToArray();
             }
             //  Invoke the method
             object result = method.Invoke(obj, paramsIn);

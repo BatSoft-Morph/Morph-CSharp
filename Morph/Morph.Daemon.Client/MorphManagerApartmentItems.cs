@@ -14,7 +14,7 @@ namespace Morph.Daemon.Client
 
         public int Generate()
         {
-            return (int)ServletProxy.CallMethod("Obtain", null);
+            return (int)ServletProxy.CallMethod("Obtain", null, true);
         }
 
         public void Release(int id)

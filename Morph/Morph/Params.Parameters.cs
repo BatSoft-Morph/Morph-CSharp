@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.Remoting.Messaging;
 
 namespace Morph.Params
 {
@@ -43,18 +41,10 @@ namespace Morph.Params
         {
             if (Params == null)
                 return null;
-            return Encode(Params, null, instanceFactories);
-        }
-
-        static public MorphWriter Encode(object[] Params, object special, InstanceFactories instanceFactories)
-        {
-            int paramCount = 1 + (Params == null ? 0 : Params.Length);
             MemoryStream stream = new MemoryStream();
             MorphWriter writer = new MorphWriter(stream);
             //  Write the param count
-            writer.WriteInt32(paramCount);
-            //  Write the "special" param (ie. return value, property value)
-            EncodeValue(writer, instanceFactories, null, special, true, true);
+            writer.WriteInt32(Params.Length);
             //  Write each param
             if (Params != null)
                 foreach (object obj in Params)
@@ -62,6 +52,15 @@ namespace Morph.Params
             //  Return the data
             stream.Close();
             return writer;
+        }
+
+        static public MorphWriter Encode(object[] Params, object special, InstanceFactories instanceFactories)
+        {
+            List<object> paramsList = new List<object>();
+            if (Params != null)
+                paramsList.AddRange(Params);
+            paramsList.Add(special);
+            return Encode(paramsList.ToArray(), instanceFactories);
         }
 
         static private void WriteValueType(MorphWriter writer, byte valueType, string valueName, string typeName)
@@ -280,27 +279,39 @@ namespace Morph.Params
 
         #region Decoding
 
-        static public void Decode(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader dataReader, out object[] Params, out object special)
+        static public void Decode(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader dataReader, out object[] Params)
         {
+            Params = null;
             if ((dataReader == null) || !dataReader.CanRead)
-            {
-                Params = null;
-                special = null;
                 return;
-            }
             //  Param count
-            int paramCount = dataReader.ReadInt32() - 1;
-            //  Read in special
-            special = DecodeValue(instanceFactories, devicePath, dataReader, out string Name);
+            int paramCount = dataReader.ReadInt32();
             //  Read in parameters
             if (paramCount > 0)
             {
                 Params = new object[paramCount];
                 for (int i = 0; i < Params.Length; i++)
-                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out Name);
+                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out _);
             }
-            else
-                Params = null;
+        }
+
+        static public void Decode(InstanceFactories instanceFactories, LinkStack devicePath, MorphReader dataReader, out object[] Params, out object special)
+        {
+            Params = null;
+            special = null;
+            if ((dataReader == null) || !dataReader.CanRead)
+                return;
+            //  Param count
+            int paramCount = dataReader.ReadInt32() - 1;
+            //  Read in parameters
+            if (paramCount > 0)
+            {
+                Params = new object[paramCount];
+                for (int i = 0; i < Params.Length; i++)
+                    Params[i] = DecodeValue(instanceFactories, devicePath, dataReader, out _);
+            }
+            //  Read in special
+            special = DecodeValue(instanceFactories, devicePath, dataReader, out _);
         }
 
         static private byte ReadValueType(MorphReader reader, out string valueName, out string typeName)
