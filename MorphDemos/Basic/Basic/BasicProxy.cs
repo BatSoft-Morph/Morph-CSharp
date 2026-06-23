@@ -72,22 +72,22 @@ namespace Basic
 
         public void assignNumber(int number)
         {
-            _Proxy.CallMethod("assignNumber", new object[] { number });
+            _Proxy.CallMethod("assignNumber", new object[] { number }, false);
         }
 
         public int retrieveNumber()
         {
-            return (int)_Proxy.CallMethod("retrieveNumber", null);
+            return (int)_Proxy.CallMethod("retrieveNumber", null, true);
         }
 
         public void assignText(string text)
         {
-            _Proxy.CallMethod("assignText", new object[] { text });
+            _Proxy.CallMethod("assignText", new object[] { text }, false);
         }
 
         public string retrieveText()
         {
-            return (string)_Proxy.CallMethod("retrieveText", null);
+            return (string)_Proxy.CallMethod("retrieveText", null, true);
         }
 
         public int number
@@ -115,22 +115,22 @@ namespace Basic
 
         public void assignStruct(BasicStruct aStruct)
         {
-            _Proxy.CallMethod("assignStruct", new object[] { aStruct });
+            _Proxy.CallMethod("assignStruct", new object[] { aStruct }, false);
         }
 
         public BasicStruct retrieveStruct()
         {
-            return (BasicStruct)_Proxy.CallMethod("retrieveStruct", null);
+            return (BasicStruct)_Proxy.CallMethod("retrieveStruct", null, true);
         }
 
         public void assignObject(BasicClass aObject)
         {
-            _Proxy.CallMethod("assignObject", new object[] { aObject });
+            _Proxy.CallMethod("assignObject", new object[] { aObject }, false);
         }
 
         public BasicClass retrieveObject()
         {
-            return (BasicClass)_Proxy.CallMethod("retrieveObject", null);
+            return (BasicClass)_Proxy.CallMethod("retrieveObject", null, true);
         }
     }
 
@@ -146,12 +146,12 @@ namespace Basic
 
         public void assignChars(char[] chars)
         {
-            _Proxy.CallMethod("assignChars", new object[] { chars });
+            _Proxy.CallMethod("assignChars", new object[] { chars }, false);
         }
 
         public char[] retrieveChars()
         {
-            return (char[])_Proxy.CallMethod("retrieveChars", null);
+            return (char[])_Proxy.CallMethod("retrieveChars", null, true);
         }
     }
 
@@ -167,12 +167,12 @@ namespace Basic
 
         public void custom()
         {
-            _Proxy.CallMethod("custom", null);
+            _Proxy.CallMethod("custom", null, false);
         }
 
         public void morph()
         {
-            _Proxy.CallMethod("morph", null);
+            _Proxy.CallMethod("morph", null, false);
         }
     }
 }
