@@ -17,7 +17,7 @@ namespace MorphDemoBookingClient
 
         public IBookingDiplomatServer Register(string clientName, IBookingDiplomatClient client)
         {
-            return (IBookingDiplomatServer)_servletProxy.CallMethod("Register", new object[] { clientName, client });
+            return (IBookingDiplomatServer)_servletProxy.CallMethod("Register", new object[] { clientName, client }, true);
         }
 
         #endregion
@@ -38,22 +38,22 @@ namespace MorphDemoBookingClient
 
         public string Book(string objectName)
         {
-            return (string)_servletProxy.CallMethod("Book", new object[] { objectName });
+            return (string)_servletProxy.CallMethod("Book", new object[] { objectName }, true);
         }
 
         public string Unbook(string objectName)
         {
-            return (string)_servletProxy.CallMethod("Unbook", new object[] { objectName });
+            return (string)_servletProxy.CallMethod("Unbook", new object[] { objectName }, true);
         }
 
         public string OwnerOf(string objectName)
         {
-            return (string)_servletProxy.CallMethod("OwnerOf", new object[] { objectName });
+            return (string)_servletProxy.CallMethod("OwnerOf", new object[] { objectName }, true);
         }
 
         public string[] GetQueue(string objectName)
         {
-            return (string[])_servletProxy.CallMethod("GetQueue", new object[] { objectName });
+            return (string[])_servletProxy.CallMethod("GetQueue", new object[] { objectName }, true);
         }
 
         public void Nudge(string objectName)

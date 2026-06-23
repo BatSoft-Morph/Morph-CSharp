@@ -192,7 +192,7 @@ namespace MorphDemoBookingServer
 
         public void NudgedBy(string clientName)
         {
-            _servletProxy.CallMethod("NudgedBy", new object[] { clientName });
+            _servletProxy.CallMethod("NudgedBy", new object[] { clientName }, false);
         }
 
         #endregion
