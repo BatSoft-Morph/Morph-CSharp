@@ -75,6 +75,11 @@
     <Compile Include="Lib.RegisterItems.cs" />
     <Compile Include="Lib.StringParser.cs" />
     <Compile Include="Lib.ThreadedActionQueue.cs" />
+    <Compile Include="Params.Decoder.cs" />
+    <Compile Include="Params.Encoder.Array.cs" />
+    <Compile Include="Params.Encoder.Simple.cs" />
+    <Compile Include="Params.Encoder.Struct.cs" />
+    <Compile Include="Params.Encoder.cs" />
     <Compile Include="Params.EncodingTypes.cs" />
     <Compile Include="Params.InstanceFactory.cs" />
     <Compile Include="Params.Parameters.cs" />

@@ -67,8 +67,8 @@ namespace Morph.Endpoint
             {
                 //  Get a device path
                 LinkStack pathToSender = null;
-                if (apartment is MorphApartmentSession)
-                    pathToSender = ((MorphApartmentSession)apartment).Path;
+                if (apartment is MorphApartmentSession session)
+                    pathToSender = session.Path;
                 else if (message.HasPathFrom)
                     pathToSender = message.PathFrom;
                 //  Invoke the method

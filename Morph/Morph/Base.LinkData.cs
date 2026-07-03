@@ -30,8 +30,8 @@ namespace Morph.Base
             _data = writer.ToArray();
             _MSB = writer.MSB;
             _isException = true;
-            if (x is EMorph)
-                _errorCode = ((EMorph)x).ErrorCode;
+            if (x is EMorph morph)
+                _errorCode = morph.ErrorCode;
             else
                 _errorCode = 0;
         }

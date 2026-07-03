@@ -17,7 +17,7 @@ namespace Morph.Daemon
 
             public bool DecodeReference(ServletProxy value, out object reference)
             {
-                if (!"ServiceCallback".Equals(value.TypeName))
+                if (!typeof(ServiceCallback).Name.Equals(value.TypeName))
                 {
                     reference = null;
                     return false;
