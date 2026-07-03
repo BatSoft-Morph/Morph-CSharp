@@ -83,7 +83,6 @@
     <Compile Include="Params.EncodingTypes.cs" />
     <Compile Include="Params.InstanceFactory.cs" />
     <Compile Include="Params.Parameters.cs" />
-    <Compile Include="Params.SimpleType.cs" />
     <Compile Include="Params.Value.cs" />
     <Compile Include="Params.ValueBase.cs" />
     <Compile Include="Params.ValueInstance.cs" />

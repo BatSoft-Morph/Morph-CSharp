@@ -60,6 +60,34 @@ namespace Morph.Params
             => writer.WriteInt8(0);
     }
 
+    public static class SimpleType
+    {
+        public const byte TypeMask = 0x0F;
+        public const byte TypeInteger = 0x00;
+        public const byte TypeChar = 0x01;
+        public const byte TypeFloat = 0x02;
+        public const byte TypeString = 0x03;
+        public const byte TypeEnumOrd = 0x04;
+        public const byte TypeEnumStr = 0x05;
+        public const byte TypeWhenStr = 0x07;
+        public const byte TypeCurrency = 0x0A;
+        public const byte TypeBoolean = 0x0C;
+
+        public const byte ValueSizeMask = 0x30;
+        public const byte Size8Bit = 0x00;
+        public const byte Size16Bit = 0x10;
+        public const byte Size32Bit = 0x20;
+        public const byte Size64Bit = 0x30;
+
+        public const byte WhenDateTime = 0x30;
+
+        public const byte IsSigned = 0x40;
+        public const byte HasValue = 0x80;
+
+        public const byte BoolFalse = 0x00;
+        public const byte BoolTrue = 0x10;
+    }
+
     public class Encoders
     {
         public Encoders()
@@ -131,7 +159,7 @@ namespace Morph.Params
         }
 
         public bool IsSimpleType(Type type)
-            => SimpleType.GetEncoder(type, out _);  //XX    Use simpleTypes.ContainsKey(type);
+            => simpleTypes.ContainsKey(type);
 
         public Encoder FindEncoder(Type type)
         {
