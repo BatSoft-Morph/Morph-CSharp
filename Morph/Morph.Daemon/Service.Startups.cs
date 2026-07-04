@@ -147,11 +147,6 @@ namespace Morph.Daemon
 
         #endregion
 
-        public void Refresh(LinkMessage message)
-        {
-            RegisteredServices.LoadStartups();
-        }
-
         public void Add(LinkMessage message, string serviceName, string fileName, string parameters, int timeout)
         {
             VerifyAccess(message);

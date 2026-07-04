@@ -1,116 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{26117DA7-B5AE-42C1-BECA-FB29061D6C36}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Morph</RootNamespace>
     <AssemblyName>Morph</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <Company>BatSoft</Company>
+    <Product>Morph</Product>
+    <Copyright>Copyright © BatSoft 2011</Copyright>
+    <Version>1.0.0</Version>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="Core.Link.cs" />
-    <Compile Include="Base.LinkData.cs" />
-    <Compile Include="Base.LinkEnd.cs" />
-    <Compile Include="Base.LinkInformation.cs" />
-    <Compile Include="Base.LinkMessage.cs" />
-    <Compile Include="Core.MorphReader.cs" />
-    <Compile Include="Core.LinkStack.cs" />
-    <Compile Include="Core.MorphStream.cs" />
-    <Compile Include="Core.MorphWriter.cs" />
-    <Compile Include="Core.LinkType.cs" />
-    <Compile Include="Endpoint.Apartment.cs" />
-    <Compile Include="Endpoint.ApartmentProxy.cs" />
-    <Compile Include="Endpoint.ApartmentSession.cs" />
-    <Compile Include="Endpoint.ApartmentShared.cs" />
-    <Compile Include="Endpoint.Device.cs" />
-    <Compile Include="Endpoint.EMorphInvocation.cs" />
-    <Compile Include="Endpoint.LinkMember.cs" />
-    <Compile Include="Endpoint.LinkMethod.cs" />
-    <Compile Include="Endpoint.LinkProperty.cs" />
-    <Compile Include="Endpoint.LinkService.cs" />
-    <Compile Include="Endpoint.LinkServlet.cs" />
-    <Compile Include="Endpoint.NumberedWait.cs" />
-    <Compile Include="Endpoint.Replies.cs" />
-    <Compile Include="Endpoint.Service.cs" />
-    <Compile Include="Endpoint.Servlet.cs" />
-    <Compile Include="Endpoint.ServletProxy.cs" />
-    <Compile Include="Internet.ActionHandler.cs" />
-    <Compile Include="Internet.Connection.cs" />
-    <Compile Include="Internet.LinkInternet.cs" />
-    <Compile Include="Internet.LinkIPv4.cs" />
-    <Compile Include="Internet.LinkIPv6.cs" />
-    <Compile Include="Internet.Listener.cs" />
-    <Compile Include="Lib.Conversion.cs" />
-    <Compile Include="Lib.EMorph.cs" />
-    <Compile Include="Lib.IDSeed.cs" />
-    <Compile Include="Lib.Lib.ContinuousStream.cs" />
-    <Compile Include="Lib.LinkedList.cs" />
-    <Compile Include="Lib.MorphErrors.cs" />
-    <Compile Include="Lib.RegisterItems.cs" />
-    <Compile Include="Lib.StringParser.cs" />
-    <Compile Include="Lib.ThreadedActionQueue.cs" />
-    <Compile Include="Params.Decoder.cs" />
-    <Compile Include="Params.Encoder.Array.cs" />
-    <Compile Include="Params.Encoder.Simple.cs" />
-    <Compile Include="Params.Encoder.Struct.cs" />
-    <Compile Include="Params.Encoder.cs" />
-    <Compile Include="Params.EncodingTypes.cs" />
-    <Compile Include="Params.InstanceFactory.cs" />
-    <Compile Include="Params.Parameters.cs" />
-    <Compile Include="Params.Value.cs" />
-    <Compile Include="Params.ValueBase.cs" />
-    <Compile Include="Params.ValueInstance.cs" />
-    <Compile Include="Params.ValueObject.cs" />
-    <Compile Include="Params.ValueReference.cs" />
-    <Compile Include="Params.ValueReferenceIndex.cs" />
-    <Compile Include="Params.ValueStream.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sequencing.LinkSequence.cs" />
-    <Compile Include="Sequencing.LinkSequenceIndex.cs" />
-    <Compile Include="Sequencing.LinkSequenceStart.cs" />
-    <Compile Include="Sequencing.SequenceLevel.cs" />
-    <Compile Include="Sequencing.SequenceReceiver.cs" />
-    <Compile Include="Sequencing.SequenceSender.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Internet.cd" />
-    <None Include="Params.cd" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

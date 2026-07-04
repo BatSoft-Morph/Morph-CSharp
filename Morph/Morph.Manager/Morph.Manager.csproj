@@ -1,106 +1,39 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{B26E4ED4-ABFC-4546-98A2-10870DABBEAF}</ProjectGuid>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Morph.Manager</RootNamespace>
-    <AssemblyName>Morph.Manager</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <Nullable>disable</Nullable>
+
+    <ApplicationTitle>Morph Manager</ApplicationTitle>
+    <ApplicationId>com.batsoft.morph.manager</ApplicationId>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <WindowsPackageType>None</WindowsPackageType>
+
+    <Company>BatSoft</Company>
+    <Product>Morph</Product>
+    <Copyright>Copyright © BatSoft 2011</Copyright>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#1B2A4A" />
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#1B2A4A" BaseSize="128,128" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="FMain.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FMain.designer.cs">
-      <DependentUpon>FMain.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FStartup.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FStartup.designer.cs">
-      <DependentUpon>FStartup.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FMain.resx">
-      <DependentUpon>FMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FStartup.resx">
-      <DependentUpon>FStartup.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="app.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Morph.Daemon.Client\Morph.Daemon.Client.csproj">
-      <Project>{CBE2A2F9-1B62-4DB3-8DB8-E8BBEF96F116}</Project>
-      <Name>Morph.Daemon.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Morph\Morph.csproj">
-      <Project>{26117DA7-B5AE-42C1-BECA-FB29061D6C36}</Project>
-      <Name>Morph</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Morph\Morph.csproj" />
+    <ProjectReference Include="..\Morph.Daemon.Client\Morph.Daemon.Client.csproj" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

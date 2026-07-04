@@ -31,7 +31,9 @@ namespace Morph.Lib
             AppendFullNumber(builder, when.Minute, 2);
             builder.Append(':');
             AppendFullNumber(builder, when.Second, 2);
-            if (when.Kind == DateTimeKind.Local)
+            //  "Instant is always represented by a date/time in UTC." (with 'Z')
+            //  "Local time is always represented by a date/time without 'Z'."
+            if (when.Kind == DateTimeKind.Utc)
                 builder.Append('Z');
             return builder.ToString();
         }
@@ -63,16 +65,16 @@ namespace Morph.Lib
             //  Time zone
             DateTimeKind kind;
             if (parser.IsEnded())
-                kind = DateTimeKind.Utc;
-            else if (parser.Current() == 'Z')
                 kind = DateTimeKind.Local;
+            else if (parser.Current() == 'Z')
+                kind = DateTimeKind.Utc;
             else
             {
                 DateTime result = new DateTime(year, month, day, hour, minute, second, ms, new System.Globalization.GregorianCalendar(), DateTimeKind.Utc);
                 int tzHour = Int32.Parse(parser.ReadTo(":", true));
                 int tzMinute = Int32.Parse(parser.ReadToEnd());
-                result.AddHours(-tzHour);
-                result.AddMinutes(-tzMinute);
+                result = result.AddHours(-tzHour);
+                result = result.AddMinutes(-tzMinute);
                 return result;
             }
             return new DateTime(year, month, day, hour, minute, second, ms, new System.Globalization.GregorianCalendar(), kind);

@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Threading;
-using Microsoft.Win32;
 using Morph.Base;
 
 namespace Morph.Daemon
@@ -154,20 +153,12 @@ namespace Morph.Daemon
             get => _startup;
             set
             {
+                //  Startups are persisted by the Morph Manager (Morph.Manager.json);  the daemon only holds them in memory
                 lock (this)
                 {
-                    RegistryKey morphStartups = RegisteredServices.MorphStartupsKey();
-                    //  Save
-                    morphStartups.DeleteValue(_name, false);
-                    //  Assign new startup
                     _startup = value;
                     if (_startup != null)
                     {
-                        //  Save
-                        RegistryKey startupKey = morphStartups.CreateSubKey(_name);
-                        startupKey.SetValue("Filename", value.FileName, RegistryValueKind.String);
-                        startupKey.SetValue("Parameters", value.Parameters, RegistryValueKind.String);
-                        startupKey.SetValue("Timeout", (int)value.Timeout.TotalSeconds, RegistryValueKind.DWord);
                         //  Correct the start gate
                         if (_running == null)
                             _startup._startupGate.Reset();  //  Will need to wait for startup to complete
@@ -194,11 +185,6 @@ namespace Morph.Daemon
 
         static readonly Hashtable Services = new Hashtable();
         static readonly Hashtable Connections = new Hashtable();
-
-        static RegisteredServices()
-        {
-            LoadStartups();
-        }
 
         #endregion
 
@@ -241,33 +227,5 @@ namespace Morph.Daemon
                 result[i] = (RegisteredService)entries[i].Value;
             return result;
         }
-
-        #region Persistance
-
-        static internal RegistryKey MorphStartupsKey()
-        {
-            RegistryKey Key = Registry.CurrentUser;
-            Key = Key.CreateSubKey("Software");
-            Key = Key.CreateSubKey("Morph");
-            Key = Key.CreateSubKey("Startups");
-            return Key;
-        }
-
-        static public void LoadStartups()
-        {
-            RegistryKey key = MorphStartupsKey();
-            foreach (string serviceName in key.GetSubKeyNames())
-            {
-                //  Load
-                RegistryKey startupKey = key.OpenSubKey(serviceName);
-                string filename = (string)startupKey.GetValue("Filename");
-                string parameters = (string)startupKey.GetValue("Parameters");
-                Int32 timeout = (Int32)startupKey.GetValue("Timeout");
-                //  Apply
-                ObtainByName(serviceName)._startup = new RegisteredStartup(filename, parameters, timeout);
-            }
-        }
-
-        #endregion
     }
 }

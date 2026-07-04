@@ -113,9 +113,9 @@ namespace Morph.Core
             byte b6 = ReadInt8();
             byte b7 = ReadInt8();
             if (_MSB)
-                return (b0 << 56) | (b1 << 48) | (b2 << 40) | (b3 << 32) | (b4 << 24) | (b5 << 16) | (b6 << 8) | b7;
+                return ((long)b0 << 56) | ((long)b1 << 48) | ((long)b2 << 40) | ((long)b3 << 32) | ((long)b4 << 24) | ((long)b5 << 16) | ((long)b6 << 8) | b7;
             else
-                return (b7 << 56) | (b6 << 48) | (b5 << 40) | (b4 << 32) | (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+                return ((long)b7 << 56) | ((long)b6 << 48) | ((long)b5 << 40) | ((long)b4 << 32) | ((long)b3 << 24) | ((long)b2 << 16) | ((long)b1 << 8) | b0;
         }
 
         public string ReadString()
@@ -302,9 +302,9 @@ namespace Morph.Core
             byte b6 = _bytes[_pos++];
             byte b7 = _bytes[_pos++];
             if (_MSB)
-                return (b0 << 56) | (b1 << 48) | (b2 << 40) | (b3 << 32) | (b4 << 24) | (b5 << 16) | (b6 << 8) | b7;
+                return ((long)b0 << 56) | ((long)b1 << 48) | ((long)b2 << 40) | ((long)b3 << 32) | ((long)b4 << 24) | ((long)b5 << 16) | ((long)b6 << 8) | b7;
             else
-                return (b7 << 56) | (b6 << 48) | (b5 << 40) | (b4 << 32) | (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+                return ((long)b7 << 56) | ((long)b6 << 48) | ((long)b5 << 40) | ((long)b4 << 32) | ((long)b3 << 24) | ((long)b2 << 16) | ((long)b1 << 8) | b0;
         }
 
         public override byte[] ReadBytes(int count)

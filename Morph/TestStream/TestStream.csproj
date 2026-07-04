@@ -52,18 +52,6 @@
     <Compile Include="UnitTest1.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Morph.Daemon.Client\Morph.Daemon.Client.csproj">
-      <Project>{CBE2A2F9-1B62-4DB3-8DB8-E8BBEF96F116}</Project>
-      <Name>Morph.Daemon.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Morph.Daemon\Morph.Daemon.csproj">
-      <Project>{196EFBD3-E143-4756-930A-8D7B6824595F}</Project>
-      <Name>Morph.Daemon</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Morph.Manager\Morph.Manager.csproj">
-      <Project>{B26E4ED4-ABFC-4546-98A2-10870DABBEAF}</Project>
-      <Name>Morph.Manager</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Morph\Morph.csproj">
       <Project>{26117DA7-B5AE-42C1-BECA-FB29061D6C36}</Project>
       <Name>Morph</Name>

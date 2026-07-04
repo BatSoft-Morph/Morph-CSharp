@@ -28,6 +28,15 @@ namespace Morph.Daemon
         public const string DisplayName = "Morph Daemon";
         public const string Description = "Connects applications that communicate via the Morph protocol.";
 
+        /// <summary>Runs the daemon as a plain console process, for development and testing.</summary>
+        public void RunConsole(string[] args)
+        {
+            DoStart(args);
+            Console.WriteLine(DisplayName + " is running.  Press Enter to stop.");
+            Console.ReadLine();
+            DoStop();
+        }
+
         public const int ThreadCount = 5;
         public const string ServiceName_ServicesStartup = "Morph.Startup";
         public const string ServiceName_Services = "Morph.Services";

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Morph.Manager.ViewModels"
+             x:Class="Morph.Manager.Views.StartupsPage"
+             x:DataType="vm:StartupsViewModel"
+             Title="Startups">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="12" RowSpacing="8">
+
+        <!-- Column headers -->
+        <Grid Grid.Row="0" ColumnDefinitions="2*,*,3*" Padding="12,8"
+              BackgroundColor="{StaticResource AccentColour}">
+            <Label Grid.Column="0" Text="Service" Style="{StaticResource ColumnHeader}" />
+            <Label Grid.Column="1" Text="Timeout (s)" Style="{StaticResource ColumnHeader}" />
+            <Label Grid.Column="2" Text="Application" Style="{StaticResource ColumnHeader}" />
+        </Grid>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding Startups}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedStartup, Mode=TwoWay}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:StartupRow">
+                        <Grid ColumnDefinitions="2*,*,3*" Padding="12,10">
+                            <Label Grid.Column="0" Text="{Binding ServiceName}" />
+                            <Label Grid.Column="1" Text="{Binding Timeout}" />
+                            <Label Grid.Column="2" Text="{Binding FileName}" LineBreakMode="MiddleTruncation" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="No services are registered for automatic startup."
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+
+        <HorizontalStackLayout Grid.Row="2" Spacing="8" HorizontalOptions="End">
+            <Button Text="Add" Clicked="OnAddClicked" />
+            <Button Text="Edit" Clicked="OnEditClicked" IsEnabled="{Binding HasSelection}" />
+            <Button Text="Remove" Clicked="OnRemoveClicked" IsEnabled="{Binding HasSelection}" />
+            <Button Text="Refresh" Clicked="OnRefreshClicked" />
+        </HorizontalStackLayout>
+
+    </Grid>
+</ContentPage>

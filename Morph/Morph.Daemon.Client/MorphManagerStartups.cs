@@ -9,13 +9,8 @@ namespace Morph.Daemon.Client
         {
         }
 
-        public void Refresh()
-        {
-            ServletProxy.SendMethod("Refresh", null);
-        }
-
         /**
-         * Timeout in in seconds
+         * Timeout is in seconds
          */
         public void Add(string serviceName, string fileName, string parameters, int timeout)
         {

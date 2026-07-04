@@ -13,7 +13,11 @@ namespace Morph.Daemon
             Log.Default.Add("Starting instance: " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString());
             try
             {
-                ServiceBase.Run(new MorphDaemonService());
+                //  Run from a console for development;  run under the SCM as a Windows service
+                if (Environment.UserInteractive)
+                    new MorphDaemonService().RunConsole(args);
+                else
+                    ServiceBase.Run(new MorphDaemonService());
             }
             finally
             {

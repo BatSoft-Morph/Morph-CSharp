@@ -296,6 +296,14 @@ namespace Morph.Params
         private readonly List<IInstanceEncoder> s_instanceEncoders = new List<IInstanceEncoder>();
         private readonly List<IInstanceDecoder> s_instanceDecoders = new List<IInstanceDecoder>();
         private readonly List<ISimpleFactory> s_simpleFactories = new List<ISimpleFactory>();
+        private readonly Dictionary<string, Type> s_enumTypes = new Dictionary<string, Type>();
+
+        internal Type FindEnumType(string typeName)
+        {
+            if ((typeName != null) && s_enumTypes.TryGetValue(typeName, out Type enumType))
+                return enumType;
+            return null;
+        }
 
         internal bool DecodeReference(ServletProxy value, out object reference)
         {
@@ -375,6 +383,14 @@ namespace Morph.Params
         public void Add(ISimpleFactory factory)
         {
             s_simpleFactories.Add(factory);
+        }
+
+        /// <summary>Registers an enum type so that decoded enum values can be converted to it by name.</summary>
+        public void AddEnumType(Type enumType)
+        {
+            if (!enumType.IsEnum)
+                throw new EMorphUsage("Not an enum type: " + enumType.FullName);
+            s_enumTypes.Add(enumType.Name, enumType);
         }
     }
 

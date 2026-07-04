@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Morph.Manager.ViewModels"
+             x:Class="Morph.Manager.Views.ServicesPage"
+             x:DataType="vm:ServicesViewModel"
+             Title="Services">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="12" RowSpacing="8">
+
+        <!-- Column headers -->
+        <Grid Grid.Row="0" ColumnDefinitions="2*,*,*" Padding="12,8"
+              BackgroundColor="{StaticResource AccentColour}">
+            <Label Grid.Column="0" Text="Service" Style="{StaticResource ColumnHeader}" />
+            <Label Grid.Column="1" Text="Local" Style="{StaticResource ColumnHeader}" />
+            <Label Grid.Column="2" Text="Remote" Style="{StaticResource ColumnHeader}" />
+        </Grid>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding Services}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ServiceRow">
+                        <Grid ColumnDefinitions="2*,*,*" Padding="12,10">
+                            <Label Grid.Column="0" Text="{Binding ServiceName}" />
+                            <Label Grid.Column="1" Text="{Binding AccessLocal}" />
+                            <Label Grid.Column="2" Text="{Binding AccessRemote}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="No services are running."
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+
+        <HorizontalStackLayout Grid.Row="2" Spacing="8" HorizontalOptions="End">
+            <Button Text="Refresh" Clicked="OnRefreshClicked" />
+        </HorizontalStackLayout>
+
+    </Grid>
+</ContentPage>
