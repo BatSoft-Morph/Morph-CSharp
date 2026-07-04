@@ -159,8 +159,9 @@ namespace Morph.Internet
 
         #region Connection validation
 
-        //  "Morph"#0 + Major version:1 + Minor version:1 
-        private static readonly byte[] s_MorphValidation = new byte[] { 0x4D, 0x6F, 0x72, 0x70, 0x68, 0x00, 0x01, 0x01 };
+        //  "Morph"#0 + Major version:2 + Minor version:1
+        //  (Major version 2:  the reworked ValueType/SimpleType wire format is incompatible with version 1.)
+        private static readonly byte[] s_MorphValidation = new byte[] { 0x4D, 0x6F, 0x72, 0x70, 0x68, 0x00, 0x02, 0x01 };
 
         private readonly ManualResetEvent _morphValidationSent = new ManualResetEvent(false);
 

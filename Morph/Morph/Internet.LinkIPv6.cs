@@ -47,7 +47,7 @@ namespace Morph.Internet
             //  Read port
             int port = LinkInternet.MorphPort;
             if (hasPort)
-                port = (short)reader.ReadInt16();
+                port = reader.ReadInt16() & 0x0000FFFF;
             //  Done
             return new LinkInternetIPv6(new IPEndPoint(address, port));
         }
