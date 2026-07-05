@@ -14,7 +14,7 @@ namespace Clique.Win
       try
       {
         //  Initialise Morph communication
-        MorphManager.startup(3);
+        MorphManager.Startup(3);
         MorphManager.ReplyTimeout = new TimeSpan(0, 20, 0);
 
         //  Create the Morph.Demo.Clique service
@@ -28,7 +28,7 @@ namespace Clique.Win
         CliqueObjects.Initialise(Diplomat);
 
         //  Make the apartment factory visible under the service name "Morph.Demo.Clique" to make it active
-        MorphManager.Services.startServiceShared(CliqueInterface.ServiceName, false, true, Connector, CliqueInterface.Factories);
+        MorphManager.Services.StartServiceShared(CliqueInterface.ServiceName, false, true, Connector, CliqueInterface.Factories);
       }
       catch
       {
@@ -42,7 +42,7 @@ namespace Clique.Win
       //  Say bye to all friends before...
       CliqueObjects.Finalise();
       //  ...shutting down Morph communication (including any services such as Morph.Demo.Clique)
-      MorphManager.shutdown();
+      MorphManager.Shutdown();
     }
 
     private void buttonConnect_Click(object sender, EventArgs e)

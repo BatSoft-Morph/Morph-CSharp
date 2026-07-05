@@ -14,7 +14,7 @@ namespace Clique.Interface
 
         public CliqueDiplomat hello(CliqueDiplomat diplomat)
         {
-            return (CliqueDiplomat)_Proxy.CallMethod("hello", new object[] { diplomat });
+            return (CliqueDiplomat)_Proxy.CallMethod("hello", new object[] { diplomat }, true);
         }
     }
 
@@ -35,7 +35,7 @@ namespace Clique.Interface
 
         public void changeText(CliqueDiplomat friend, string text)
         {
-            _Proxy.CallMethod("changeText", new object[] { friend, text });
+            _Proxy.CallMethod("changeText", new object[] { friend, text }, false);
         }
 
         public void bye(CliqueDiplomat friend)

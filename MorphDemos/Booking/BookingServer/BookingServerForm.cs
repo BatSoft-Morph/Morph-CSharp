@@ -14,8 +14,8 @@ namespace MorphDemoBookingServer
       InitializeComponent();
       Instance = this;
       ObjectInstance.OnClientIDChanged += OwnershipChanged;
-      MorphManager.startup(5);
-      MorphManager.Services.startServiceSessioned(
+      MorphManager.Startup(5);
+      MorphManager.Services.StartServiceSessioned(
         BookingInterface.ServiceName,
         true, true,
         new BookingRegistrationApartmentFactory(new BookingRegistrationFactory(), new BookingInstanceFactories(), new TimeSpan(2, 0, 0), SequenceLevel.None)
@@ -28,8 +28,8 @@ namespace MorphDemoBookingServer
     {
       try
       {
-        MorphManager.Services.stopService(BookingInterface.ServiceName);
-        MorphManager.shutdown();
+        MorphManager.Services.StopService(BookingInterface.ServiceName);
+        MorphManager.Shutdown();
       }
       catch (Exception x)
       {
