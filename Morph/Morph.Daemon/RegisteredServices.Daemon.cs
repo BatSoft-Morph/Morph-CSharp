@@ -1,5 +1,7 @@
 ﻿using Morph.Base;
 using Morph.Endpoint;
+using Morph.Internet;
+using System.Net;
 
 namespace Morph.Daemon
 {
@@ -10,7 +12,14 @@ namespace Morph.Daemon
             RegisteredService service = RegisteredServices.FindByName(linkService.ServiceName);
             if (service == null)
                 throw new EMorphDaemon("Service not registered: \"" + linkService.ServiceName + "\"");
-            service.Running.HandleMessage(message);
+            RegisteredRunning running = service.Running;
+            //  Enforce the access permissions the service registered with
+            bool isLocal = true;
+            if (message.Source is Connection connection)
+                isLocal = Connections.IsEndPointOnThisDevice((IPEndPoint)connection.RemoteEndPoint);
+            if ((isLocal && !running.AccessLocal) || (!isLocal && !running.AccessRemote))
+                throw new EMorphDaemon("Access denied to service \"" + linkService.ServiceName + "\"");
+            running.HandleMessage(message);
         }
 
         protected override void ActionLinkApartment(LinkMessage message, LinkApartment linkApartment)

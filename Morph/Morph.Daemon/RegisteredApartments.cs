@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections;
-using Morph.Base;
+﻿using Morph.Base;
 using Morph.Endpoint;
 using Morph.Internet;
+using System;
+using System.Collections;
 
 namespace Morph.Daemon
 {
@@ -92,7 +92,13 @@ namespace Morph.Daemon
 
         public override void HandleMessage(LinkMessage message)
         {
-            _Connection.Write(message);
+            //  The relay connection may have been closed concurrently (see Dispose)
+            Connection connection;
+            lock (this)
+                connection = _Connection;
+            if (connection == null)
+                throw new EMorphDaemon("Apartment connection has closed");
+            connection.Write(message);
         }
     }
 

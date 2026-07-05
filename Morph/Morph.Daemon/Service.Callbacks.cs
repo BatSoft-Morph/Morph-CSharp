@@ -29,30 +29,36 @@ namespace Morph.Daemon
 
         public void DoCallbackAdded(string serviceName)
         {
-            lock (_callbacks)
-                for (int i = _callbacks.Count - 1; i >= 0; i--)
-                    try
-                    {
-                        _callbacks[i].Added(serviceName);
-                    }
-                    catch
-                    {
-                        _callbacks.RemoveAt(i);
-                    }
+            //  Invoke outside the lock:  each callback does a blocking network send that must not hold the lock
+            foreach (ServiceCallback callback in Snapshot())
+                try
+                {
+                    callback.Added(serviceName);
+                }
+                catch
+                {
+                    Removed(callback);
+                }
         }
 
         public void DoCallbackRemoved(string serviceName)
         {
+            //  Invoke outside the lock:  each callback does a blocking network send that must not hold the lock
+            foreach (ServiceCallback callback in Snapshot())
+                try
+                {
+                    callback.Removed(serviceName);
+                }
+                catch
+                {
+                    Removed(callback);
+                }
+        }
+
+        private ServiceCallback[] Snapshot()
+        {
             lock (_callbacks)
-                for (int i = _callbacks.Count - 1; i >= 0; i--)
-                    try
-                    {
-                        _callbacks[i].Removed(serviceName);
-                    }
-                    catch
-                    {
-                        _callbacks.RemoveAt(i);
-                    }
+                return _callbacks.ToArray();
         }
 
         public void Listen(ServiceCallback Callback)

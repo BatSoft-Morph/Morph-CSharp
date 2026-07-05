@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Morph.Base;
+using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Threading;
-using Morph.Base;
 
 namespace Morph.Daemon
 {
@@ -38,28 +38,36 @@ namespace Morph.Daemon
 
         internal ManualResetEvent _startupGate = new ManualResetEvent(false);
 
+        //  Guards against several threads launching the process at once for one start
+        private bool _launching = false;
+
         internal void Run()
         {
-            //  Copied from http://stackoverflow.com/questions/206323/how-to-execute-command-line-in-c-get-std-out-results
-            //Create process
-            Process pProcess = new Process();
-            //path and file name of command to run
-            pProcess.StartInfo.FileName = FileName;
-            //parameters to pass to program
-            pProcess.StartInfo.Arguments = Parameters;
-            //pProcess.StartInfo.UseShellExecute = true;
-            //Set output of program to be written to process output stream
-            //pProcess.StartInfo.RedirectStandardOutput = false;
-            //Optional
-            //pProcess.StartInfo.WorkingDirectory = strWorkingDirectory;
-            //Start the process
-            pProcess.Start();
-            //Get program output
-            //string strOutput = pProcess.StandardOutput.ReadToEnd();
-            //Wait for process to finish
-            //pProcess.WaitForExit();
-            //  Wait for start up to complete
-            _startupGate.WaitOne(Timeout);
+            //  Only the first concurrent caller launches;  the rest just wait for the service to come up
+            bool doLaunch;
+            lock (this)
+            {
+                doLaunch = !_launching;
+                _launching = true;
+            }
+            try
+            {
+                if (doLaunch)
+                    using (Process pProcess = new Process())
+                    {
+                        pProcess.StartInfo.FileName = FileName;
+                        pProcess.StartInfo.Arguments = Parameters;
+                        pProcess.Start();
+                    }
+                //  Wait for start up to complete (or time out)
+                _startupGate.WaitOne(Timeout);
+            }
+            finally
+            {
+                //  This launch attempt is done;  allow a future (re)start
+                lock (this)
+                    _launching = false;
+            }
         }
 
         #endregion
@@ -165,6 +173,9 @@ namespace Morph.Daemon
                         else
                             _startup._startupGate.Set();  //  Release any threads that are waiting for startup
                     }
+                    else if (_running == null)
+                        //  Nothing running and no startup left, so don't leak an empty registration
+                        RegisteredServices.ReleaseByName(Name);
                 }
             }
         }

@@ -16,9 +16,18 @@ namespace Morph.Daemon
             lock (service)
                 if (message is LinkMessageFromIP)
                 {
-                    service.Running = new RegisteredRunningInternet(service, ((LinkMessageFromIP)message).Connection);
-                    service.Running.AccessLocal = accessLocal;
-                    service.Running.AccessRemote = accessRemote;
+                    RegisteredRunningInternet running = new RegisteredRunningInternet(service, ((LinkMessageFromIP)message).Connection);
+                    running.AccessLocal = accessLocal;
+                    running.AccessRemote = accessRemote;
+                    try
+                    {
+                        service.Running = running;
+                    }
+                    catch
+                    { //  The setter rejected it (e.g. already running), so release its connection subscription
+                        running.Dispose();
+                        throw;
+                    }
                 }
                 else
                     throw new EMorphDaemon(GetType().Name + ".Start(): Unhandled message type \"" + message.GetType().Name + "\".");
@@ -35,7 +44,7 @@ namespace Morph.Daemon
                 lock (service)
                 {
                     Connection connection = ((LinkMessageFromIP)message).Connection;
-                    if (!service.IsRunning)
+                    if (service.IsRunning)
                         if (!(service.Running is RegisteredRunningInternet) || (((RegisteredRunningInternet)service.Running).Connection != connection))
                             throw new EMorphDaemon("Caller cannot stop a service " + serviceName + " which it does not own.");
                     service.Running = null;

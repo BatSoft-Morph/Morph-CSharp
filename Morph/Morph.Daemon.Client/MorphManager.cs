@@ -34,14 +34,19 @@ namespace Morph.Daemon.Client
             set { ActionHandler.SetThreadCount(value); }
         }
 
+        static private readonly object s_lazyLock = new object();
+
         static private MorphManagerServices s_services = null;
         static public MorphManagerServices Services
         {
             get
             {
-                if (s_services == null)
-                    s_services = new MorphManagerServices(ReplyTimeout);
-                return s_services;
+                lock (s_lazyLock)
+                {
+                    if (s_services == null)
+                        s_services = new MorphManagerServices(ReplyTimeout);
+                    return s_services;
+                }
             }
         }
 
@@ -50,9 +55,12 @@ namespace Morph.Daemon.Client
         {
             get
             {
-                if (s_startups == null)
-                    s_startups = new MorphManagerStartups(ReplyTimeout);
-                return s_startups;
+                lock (s_lazyLock)
+                {
+                    if (s_startups == null)
+                        s_startups = new MorphManagerStartups(ReplyTimeout);
+                    return s_startups;
+                }
             }
         }
 

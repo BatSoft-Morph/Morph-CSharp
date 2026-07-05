@@ -30,10 +30,7 @@ namespace Morph.Daemon
         public void Release(LinkMessage message, int id)
         {
             if (message is LinkMessageFromIP)
-            {
-                Connection connection = ((LinkMessageFromIP)message).Connection;
                 _registered.Unregister(id);
-            }
             else
                 throw new EMorphDaemon(GetType().Name + ".Release(): Unhandled message type \"" + message.GetType().Name + "\".");
         }
