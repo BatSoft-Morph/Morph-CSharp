@@ -42,6 +42,7 @@ namespace Morph.Daemon.Client
     {
         public string serviceName;
         public string fileName;
+        public string parameters;
         public int timeout;
     }
 }

@@ -1,30 +1,17 @@
 using Morph.Daemon.Client;
-using Morph.Manager.Services;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace Morph.Manager.ViewModels
 {
     /// <summary>
-    /// <para>The services to start automatically, and their startup settings.</para>
-    /// <para>The persistent list lives in "Morph.Manager.json" beside the Morph Manager exe;
-    /// the daemon is synchronised to it, best effort, so registering always succeeds locally
-    /// even when the daemon is unreachable.</para>
+    /// The services the daemon starts automatically.  The daemon owns and persists this list;
+    /// this view-model is a thin UI over the daemon's "Morph.Startup" service - it reads the list
+    /// from the daemon and adds/removes through it, holding no file of its own.
     /// </summary>
     public class StartupsViewModel : ViewModelBase
     {
-        public StartupsViewModel()
-        {
-            _entries = _store.Load();
-            foreach (StartupEntry entry in _entries)
-                Startups.Add(new StartupRow(entry));
-        }
-
-        private readonly StartupStore _store = new StartupStore();
-        private readonly List<StartupEntry> _entries;
-
         public ObservableCollection<StartupRow> Startups { get; } = new ObservableCollection<StartupRow>();
 
         private StartupRow _selectedStartup;
@@ -55,97 +42,27 @@ namespace Morph.Manager.ViewModels
             }
         }
 
-        #region The store is the truth
+        #region The daemon is the truth
 
-        private StartupEntry FindEntry(string serviceName)
-        {
-            foreach (StartupEntry entry in _entries)
-                if (entry.ServiceName == serviceName)
-                    return entry;
-            return null;
-        }
-
-        private void ReloadRows()
-        {
-            string selectedServiceName = SelectedStartup?.ServiceName;
-            Startups.Clear();
-            foreach (StartupEntry entry in _entries)
-            {
-                StartupRow row = new StartupRow(entry);
-                Startups.Add(row);
-                if (entry.ServiceName == selectedServiceName)
-                    SelectedStartup = row;
-            }
-        }
-
-        public async Task AddAsync(string serviceName, string fileName, string parameters, int timeout)
-        {
-            StartupEntry entry = FindEntry(serviceName) ?? NewEntry(serviceName);
-            entry.FileName = fileName;
-            entry.Parameters = parameters;
-            entry.Timeout = timeout;
-            _store.Save(_entries);
-            ReloadRows();
-            await PushToDaemonAsync(entry);
-        }
-
-        public Task ReplaceAsync(string serviceName, string fileName, string parameters, int timeout)
-            => AddAsync(serviceName, fileName, parameters, timeout);
-
-        public async Task RemoveAsync(string serviceName)
-        {
-            StartupEntry entry = FindEntry(serviceName);
-            if (entry == null)
-                return;
-            _entries.Remove(entry);
-            _store.Save(_entries);
-            ReloadRows();
-            try
-            {
-                await Task.Run(() => MorphManager.Startups.Remove(serviceName));
-            }
-            catch (Exception x)
-            {
-                ReportFailure(x);
-            }
-        }
-
-        private StartupEntry NewEntry(string serviceName)
-        {
-            StartupEntry entry = new StartupEntry { ServiceName = serviceName };
-            _entries.Add(entry);
-            return entry;
-        }
-
-        #endregion
-
-        #region Best effort daemon synchronisation
-
-        private async Task PushToDaemonAsync(StartupEntry entry)
-        {
-            try
-            {
-                await Task.Run(() => MorphManager.Startups.Add(entry.ServiceName, entry.FileName, entry.Parameters, entry.Timeout));
-            }
-            catch (Exception x)
-            {
-                ReportFailure(x);
-            }
-        }
-
-        /// <summary>Pushes the whole stored list to the daemon.  One failure report covers the lot.</summary>
-        public async Task SyncWithDaemonAsync()
+        /// <summary>Reloads the startup list from the daemon, which owns it.</summary>
+        public async Task RefreshAsync()
         {
             if (IsRefreshing)
                 return;
             IsRefreshing = true;
             try
             {
-                await Task.Run(() =>
-                {
-                    foreach (StartupEntry entry in _entries)
-                        MorphManager.Startups.Add(entry.ServiceName, entry.FileName, entry.Parameters, entry.Timeout);
-                });
+                DaemonStartup[] startups = await Task.Run(() => MorphManager.Startups.ListServices());
+                string selectedServiceName = SelectedStartup?.ServiceName;
+                Startups.Clear();
+                if (startups != null)
+                    foreach (DaemonStartup startup in startups)
+                    {
+                        StartupRow row = new StartupRow(startup);
+                        Startups.Add(row);
+                        if (startup.serviceName == selectedServiceName)
+                            SelectedStartup = row;
+                    }
             }
             catch (Exception x)
             {
@@ -157,17 +74,46 @@ namespace Morph.Manager.ViewModels
             }
         }
 
+        public async Task AddAsync(string serviceName, string fileName, string parameters, int timeout)
+        {
+            try
+            {
+                await Task.Run(() => MorphManager.Startups.Add(serviceName, fileName, parameters, timeout));
+            }
+            catch (Exception x)
+            {
+                ReportFailure(x);
+            }
+            await RefreshAsync();
+        }
+
+        public Task ReplaceAsync(string serviceName, string fileName, string parameters, int timeout)
+            => AddAsync(serviceName, fileName, parameters, timeout);
+
+        public async Task RemoveAsync(string serviceName)
+        {
+            try
+            {
+                await Task.Run(() => MorphManager.Startups.Remove(serviceName));
+            }
+            catch (Exception x)
+            {
+                ReportFailure(x);
+            }
+            await RefreshAsync();
+        }
+
         #endregion
     }
 
     public class StartupRow
     {
-        public StartupRow(StartupEntry entry)
+        public StartupRow(DaemonStartup startup)
         {
-            ServiceName = entry.ServiceName;
-            FileName = entry.FileName;
-            Timeout = entry.Timeout;
-            Parameters = entry.Parameters;
+            ServiceName = startup.serviceName;
+            FileName = startup.fileName;
+            Parameters = startup.parameters;
+            Timeout = startup.timeout;
         }
 
         public string ServiceName { get; }

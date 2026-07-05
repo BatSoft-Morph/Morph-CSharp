@@ -114,3 +114,22 @@ From the multi-agent defect review, these were investigated and are **correct as
   removed from `Booking.sln`/`Clique.sln` and their folders deleted. Both solutions now build
   green (0 warnings): `Booking.sln` → `BookingServer.exe` + `BookingClient.exe`; `Clique.sln` →
   `Clique.Win.exe`, all at `bin\Debug\`.
+- **Startup-service persistence moved from the Manager to the daemon** (design bug fix, Peter
+  2026-07-06). Previously `Morph.Manager` owned the list in `Morph.Manager.json` (added by the
+  earlier "Fable 5" commit `64fe434`) and the daemon held startups only in memory — so the
+  always-on daemon depended on the occasional UI for its own recovery, and lost all startups on
+  restart. **Rejected** that ownership. Now the **daemon owns and persists** it (`Morph.Daemon/
+  StartupStore.cs`): it loads on `DoStart` (registering each so services launch on demand) and
+  rewrites on every `StartupImpl.Add`/`Remove`. Store is JSON — **Debug** build: beside the daemon
+  exe (`bin\Debug\Startups.json`); **Release** build: `%ProgramData%\Morph\Startups.json` (chosen
+  via `#if DEBUG`). The Manager is now a thin UI over the daemon's `Morph.Startup` service
+  (`Morph.Manager/Services/StartupStore.cs` deleted; `StartupsViewModel` lists/adds/removes only
+  through the daemon). The wire `DaemonStartup` struct gained a `parameters` field (both ends) so
+  the daemon's `ListServices` is a faithful source — that missing field was the only reason the
+  Manager had kept its own copy. `System.Text.Json` added to the net48 daemon (runtime-verified).
+  Design principle affirmed: **Morph.Manager is UI only; the daemon owns all persistent state.**
+  Lineage: the *original* daemon persisted startups in the registry at
+  `HKEY_CURRENT_USER\Software\Morph\Startups` (per-service `Filename`/`Parameters`/`Timeout`),
+  added at `3572558` and removed at `64fe434`. The new JSON store keeps the **identical fields**,
+  so nothing is lost; it also fixes the old per-user `HKCU` scope (wrong for a service) by using
+  machine-wide `%ProgramData%\Morph\` in Release. No registry remnants remain (verified).

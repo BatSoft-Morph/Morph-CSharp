@@ -77,6 +77,8 @@ namespace Morph.Daemon
                 StartService(ServiceName_Services, new ServicesImpl(), DaemonFactory);
                 StartService(ServiceName_Apartments, new ApartmentObjects("Apartments", MorphApartment.IDFactory, RegisteredApartments.Apartments), SimpleFactory);
                 StartService(ServiceName_ApartmentProxies, new ApartmentObjects("ApartmentProxies", MorphApartmentProxy.IDFactory, RegisteredApartments.ApartmentProxies), SimpleFactory);
+                //  Restore the persisted startup registrations, so their services launch on demand again
+                StartupStore.LoadInto();
                 ListenerManager.Obtain(LinkInternet.MorphPort).StartAll();
             }
             catch (Exception x)

@@ -27,8 +27,8 @@ namespace Morph.Tests
         {
             DaemonStartup[] startups = new DaemonStartup[]
             {
-                new DaemonStartup { serviceName = "ServiceA", fileName = @"C:\a.exe", timeout = 10 },
-                new DaemonStartup { serviceName = "ServiceB", fileName = @"C:\b.exe", timeout = 20 },
+                new DaemonStartup { serviceName = "ServiceA", fileName = @"C:\a.exe", parameters = "-a", timeout = 10 },
+                new DaemonStartup { serviceName = "ServiceB", fileName = @"C:\b.exe", parameters = "", timeout = 20 },
             };
             object result = RoundTripSpecial(startups);
             Assert.That(result, Is.InstanceOf<DaemonStartup[]>());
@@ -36,8 +36,10 @@ namespace Morph.Tests
             Assert.That(typed.Length, Is.EqualTo(2));
             Assert.That(typed[0].serviceName, Is.EqualTo("ServiceA"));
             Assert.That(typed[0].fileName, Is.EqualTo(@"C:\a.exe"));
+            Assert.That(typed[0].parameters, Is.EqualTo("-a"));
             Assert.That(typed[0].timeout, Is.EqualTo(10));
             Assert.That(typed[1].serviceName, Is.EqualTo("ServiceB"));
+            Assert.That(typed[1].parameters, Is.EqualTo(""));
         }
 
         [Test]

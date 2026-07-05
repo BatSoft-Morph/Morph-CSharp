@@ -150,8 +150,9 @@ namespace Morph.Daemon
         public void Add(LinkMessage message, string serviceName, string fileName, string parameters, int timeout)
         {
             VerifyAccess(message);
-            //  Add startup
+            //  Add startup, then persist the daemon's startup list
             RegisteredServices.ObtainByName(serviceName).Startup = new RegisteredStartup(fileName, parameters, timeout);
+            StartupStore.Save();
             //  Fire event
             StartupImpl.s_serviceCallbacks.DoCallbackAdded(serviceName);
         }
@@ -159,8 +160,9 @@ namespace Morph.Daemon
         public void Remove(LinkMessage message, string serviceName)
         {
             VerifyAccess(message);
-            //  Remove startup
+            //  Remove startup, then persist the daemon's startup list
             RegisteredServices.ObtainByName(serviceName).Startup = null;
+            StartupStore.Save();
             //  Fire event
             StartupImpl.s_serviceCallbacks.DoCallbackRemoved(serviceName);
         }
@@ -180,6 +182,7 @@ namespace Morph.Daemon
                         DaemonStartup runningService = new DaemonStartup();
                         runningService.serviceName = service.Name;
                         runningService.fileName = service.Startup.FileName;
+                        runningService.parameters = service.Startup.Parameters ?? "";
                         runningService.timeout = (int)service.Startup.Timeout.TotalSeconds;
                         result.Add(runningService);
                     }
@@ -202,6 +205,7 @@ namespace Morph.Daemon
     {
         public string serviceName;
         public string fileName;
+        public string parameters;
         public int timeout;
     }
 }

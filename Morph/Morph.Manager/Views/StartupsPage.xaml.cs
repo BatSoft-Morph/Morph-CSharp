@@ -24,12 +24,12 @@ namespace Morph.Manager.Views
             if (_loaded)
                 return;
             _loaded = true;
-            //  The stored list is already showing;  bring the daemon up to date with it
-            await _viewModel.SyncWithDaemonAsync();
+            //  Load the current startup list from the daemon (which owns it)
+            await _viewModel.RefreshAsync();
         }
 
         private async void OnRefreshClicked(object sender, EventArgs args)
-            => await _viewModel.SyncWithDaemonAsync();
+            => await _viewModel.RefreshAsync();
 
         private async void OnAddClicked(object sender, EventArgs args)
         {
