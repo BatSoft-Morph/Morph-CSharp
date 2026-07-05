@@ -57,7 +57,7 @@ namespace Morph.Manager.Views
             StartupRow selected = _viewModel.SelectedStartup;
             if (selected == null)
                 return;
-            bool confirmed = await DisplayAlert(
+            bool confirmed = await DisplayAlertAsync(
                 "Removing startup",
                 "Are you sure you want to remove automatic startup of service \"" + selected.ServiceName + "\"?",
                 "Yes", "No");
@@ -68,11 +68,11 @@ namespace Morph.Manager.Views
         private async void ShowException(Exception x)
         {
             if (x is EMorphInvocation invocation)
-                await DisplayAlert(invocation.ClassName, x.Message, "OK");
+                await DisplayAlertAsync(invocation.ClassName, x.Message, "OK");
             else if (x.InnerException == null)
-                await DisplayAlert(x.GetType().Name, x.Message, "OK");
+                await DisplayAlertAsync(x.GetType().Name, x.Message, "OK");
             else
-                await DisplayAlert(x.GetType().Name, x.Message + '\n' + x.InnerException.Message, "OK");
+                await DisplayAlertAsync(x.GetType().Name, x.Message + '\n' + x.InnerException.Message, "OK");
         }
     }
 }

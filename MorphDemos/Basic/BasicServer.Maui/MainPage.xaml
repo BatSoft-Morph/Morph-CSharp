@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BasicServer.Maui.MainPage"
+             Title="Basic Server">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="14">
+            <Label Text="Morph — Basic demo server" FontSize="20" FontAttributes="Bold" />
+            <Label x:Name="StatusLabel" Text="Starting…" />
+            <Label Text="The connected client reads and writes these two values:" />
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <Label Grid.Row="0" Grid.Column="0" Text="Number" VerticalOptions="Center" />
+                <Entry Grid.Row="0" Grid.Column="1" x:Name="NumberEntry" Keyboard="Numeric" Text="0" />
+                <Label Grid.Row="1" Grid.Column="0" Text="Text" VerticalOptions="Center" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="TextEntry" Text="" />
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

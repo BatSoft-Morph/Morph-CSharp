@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BasicClient.Maui.MainPage"
+             Title="Basic Client">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="10">
+            <Label Text="Morph — Basic demo client" FontSize="20" FontAttributes="Bold" />
+
+            <!-- Connection -->
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                <Label Grid.Column="0" Text="Host" VerticalOptions="Center" />
+                <Entry Grid.Column="1" x:Name="HostEntry" Text="127.0.0.1" />
+                <Button Grid.Column="2" x:Name="ConnectButton" Text="Connect" Clicked="OnConnect" />
+            </Grid>
+            <Label x:Name="StatusLabel" Text="Not connected." />
+
+            <!-- Values -->
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+                <Label Grid.Row="0" Grid.Column="0" Text="Number" VerticalOptions="Center" />
+                <Entry Grid.Row="0" Grid.Column="1" x:Name="NumberEntry" Keyboard="Numeric" Text="42" />
+                <Label Grid.Row="1" Grid.Column="0" Text="Text" VerticalOptions="Center" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="TextEntry" Text="Hello" />
+            </Grid>
+
+            <Label Text="Simple" Style="{StaticResource SectionHeader}" />
+            <FlexLayout Wrap="Wrap">
+                <Button Text="Assign Number" Clicked="OnAssignNumber" />
+                <Button Text="Retrieve Number" Clicked="OnRetrieveNumber" />
+                <Button Text="Get Number" Clicked="OnGetNumber" />
+                <Button Text="Set Number" Clicked="OnSetNumber" />
+                <Button Text="Assign Text" Clicked="OnAssignText" />
+                <Button Text="Retrieve Text" Clicked="OnRetrieveText" />
+                <Button Text="Get Text" Clicked="OnGetText" />
+                <Button Text="Set Text" Clicked="OnSetText" />
+            </FlexLayout>
+
+            <Label Text="Structs and objects" Style="{StaticResource SectionHeader}" />
+            <FlexLayout Wrap="Wrap">
+                <Button Text="Assign Struct" Clicked="OnAssignStruct" />
+                <Button Text="Retrieve Struct" Clicked="OnRetrieveStruct" />
+                <Button Text="Assign Class" Clicked="OnAssignClass" />
+                <Button Text="Retrieve Class" Clicked="OnRetrieveClass" />
+            </FlexLayout>
+
+            <Label Text="Arrays" Style="{StaticResource SectionHeader}" />
+            <FlexLayout Wrap="Wrap">
+                <Button Text="Assign Array" Clicked="OnAssignArray" />
+                <Button Text="Retrieve Array" Clicked="OnRetrieveArray" />
+            </FlexLayout>
+
+            <Label Text="Exceptions (expected — shown in a dialog)" Style="{StaticResource SectionHeader}" />
+            <FlexLayout Wrap="Wrap">
+                <Button Text="Custom" Clicked="OnCustom" />
+                <Button Text="Morph" Clicked="OnMorph" />
+            </FlexLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

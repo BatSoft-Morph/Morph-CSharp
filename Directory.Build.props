@@ -1,0 +1,17 @@
+<Project>
+
+  <!--
+    Restore the pre-SDK-migration "flat" output layout:  build outputs go to
+    bin\<Configuration>\ (e.g. bin\Debug\) instead of the SDK default
+    bin\<Configuration>\<TargetFramework>\ (e.g. bin\Debug\net48\).
+
+    Single-target projects (the daemon, the WinForms demos, the libraries and
+    test projects) all inherit this.  MAUI projects override it back to the SDK
+    default below - they multi-target and/or carry a runtime-identifier folder,
+    so their per-framework outputs would collide in a single flat folder.
+  -->
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+</Project>
