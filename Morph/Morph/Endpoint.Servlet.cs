@@ -67,7 +67,8 @@ namespace Morph.Endpoint
         public Servlet Obtain(object servletObject, string typeName)
         {
             Servlet servlet = new Servlet(_apartment, _servletIDSeed.Generate(), servletObject, typeName);
-            _servlets.Add(servlet.ID, servlet);
+            lock (_servlets)
+                _servlets.Add(servlet.ID, servlet);
             return servlet;
         }
 
@@ -75,14 +76,16 @@ namespace Morph.Endpoint
         {
             if (servletID == _default.ID)
                 throw new EMorphUsage("Cannot deregister default servlet");
-            _servlets.Remove(servletID);
+            lock (_servlets)
+                _servlets.Remove(servletID);
         }
 
         public Servlet Find(int servletID)
         {
             if (servletID == _default.ID)
                 return Default;
-            return (Servlet)(_servlets[servletID]);
+            lock (_servlets)
+                return (Servlet)(_servlets[servletID]);
         }
     }
 }

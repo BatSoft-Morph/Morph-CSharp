@@ -174,8 +174,15 @@ namespace Morph.Internet
         private void TestMorphValidation()
         {
             byte[] buffer = new byte[8];
-            if (buffer.Length != _socket.Receive(buffer))
-                throw new EMorph("Remote connection appears to not be a Morph connection.");
+            //  The 8 validation bytes may be split across several TCP segments, so read until full
+            int total = 0;
+            while (total < buffer.Length)
+            {
+                int read = _socket.Receive(buffer, total, buffer.Length - total, SocketFlags.None);
+                if (read <= 0)
+                    throw new EMorph("Remote connection appears to not be a Morph connection.");
+                total += read;
+            }
             for (int i = 5; i >= 0; i--)
                 if (buffer[i] != s_MorphValidation[i])
                     throw new EMorph("Remote connection appears to not be a Morph connection.");
@@ -303,7 +310,6 @@ namespace Morph.Internet
                 OnClose?.Invoke(this, new EventArgs());
                 //  Try to tell other end that the socket is closing
                 if (_socket.Connected)
-                {
                     try
                     {
                         _socket.Send(new byte[] { 0 }); //  Sending LinkEnd
@@ -311,9 +317,8 @@ namespace Morph.Internet
                     catch
                     {
                     }
-                    //  Now close the socket
-                    _socket.Close();
-                }
+                //  Always close the socket, even when the remote end has already disconnected
+                _socket.Close();
             }
         }
 
@@ -420,12 +425,18 @@ namespace Morph.Internet
             return Add(NewSocket(remoteEndPoint));
         }
 
+        private static readonly object s_obtainLock = new object();
+
         static public Connection Obtain(IPEndPoint remoteEndPoint)
         {
-            Connection connection = Find(remoteEndPoint);
-            if (connection == null)
-                return new Connection(NewSocket(remoteEndPoint));
-            return connection;
+            //  Serialise find-then-create so two callers can't create duplicate connections to one endpoint
+            lock (s_obtainLock)
+            {
+                Connection connection = Find(remoteEndPoint);
+                if (connection == null)
+                    connection = new Connection(NewSocket(remoteEndPoint));
+                return connection;
+            }
         }
 
         static public Connection Find(IPEndPoint remoteEndPoint)

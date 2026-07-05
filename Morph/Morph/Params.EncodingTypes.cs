@@ -65,6 +65,7 @@ namespace Morph.Params
         public virtual void Dispose()
         {
             MorphApartment = null;
+            GC.SuppressFinalize(this);
         }
 
         #endregion

@@ -27,9 +27,8 @@ namespace Morph.Lib
 
         private void Add(object key, T item)
         {
-            lock (_items)
-                if (!_items.Contains(key))
-                    _items.Add(key, item);
+            if (!_items.Contains(key))
+                _items.Add(key, item);
         }
 
         #endregion
@@ -37,14 +36,23 @@ namespace Morph.Lib
         #region Public
 
         public int Count
-        { get => _items.Count; }
+        {
+            get
+            {
+                lock (_items)
+                    return _items.Count;
+            }
+        }
 
         public void Add(T item)
         {
-            if (item is IRegisterItemID itemID)
-                Add(itemID.ID, item);
-            if (item is IRegisterItemName itemName)
-                Add(itemName.Name, item);
+            lock (_items)
+            {
+                if (item is IRegisterItemID itemID)
+                    Add(itemID.ID, item);
+                if (item is IRegisterItemName itemName)
+                    Add(itemName.Name, item);
+            }
         }
 
         public void Remove(T item)
@@ -74,9 +82,12 @@ namespace Morph.Lib
         public List<T> List()
         {
             List<T> Result = new List<T>();
-            IEnumerator enums = _items.GetEnumerator();
-            while (enums.MoveNext())
-                Result.Add((T)((DictionaryEntry)enums.Current).Value);
+            lock (_items)
+            {
+                IEnumerator enums = _items.GetEnumerator();
+                while (enums.MoveNext())
+                    Result.Add((T)((DictionaryEntry)enums.Current).Value);
+            }
             return Result;
         }
 

@@ -11,17 +11,22 @@ namespace Morph.Sequencing
         internal SequenceSender(int senderID, bool isLossless)
         {
             this.SenderID = senderID;
+            _registeredID = senderID;
             this.IsLossless = isLossless;
             lock (SequenceSenders.s_all)
                 SequenceSenders.s_all.Add(senderID, this);
         }
+
+        //  The key this sender is registered under.  SenderID is zeroed when the sender stops,
+        //  so deregistration must use this stable key rather than SenderID.
+        private readonly int _registeredID;
 
         #region IDisposable Members
 
         public void Dispose()
         {
             lock (SequenceSenders.s_all)
-                SequenceSenders.s_all.Remove(SenderID);
+                SequenceSenders.s_all.Remove(_registeredID);
         }
 
         #endregion
@@ -101,17 +106,19 @@ namespace Morph.Sequencing
         private void TryEnd()
         {
             lock (this)
-            {
-                if ((_notAcked != null) && (_notAcked.Count == 0))
+                if (IsStopped && (_notAcked != null) && (_notAcked.Count == 0))
                     Dispose();
-            }
         }
 
         internal void Ack(int index)
         {
             if (_notAcked != null)
+            {
                 lock (_notAcked)
                     _notAcked.Remove(index);
+                //  The last ack of a stopped sender releases it
+                TryEnd();
+            }
         }
 
         internal void Resend(int index)
@@ -121,7 +128,9 @@ namespace Morph.Sequencing
                 LinkMessage Message;
                 lock (_notAcked)
                     Message = (LinkMessage)_notAcked[index];
-                Message.NextLinkAction();
+                //  The message may have been acked in the meantime
+                if (Message != null)
+                    Message.NextLinkAction();
             }
         }
     }

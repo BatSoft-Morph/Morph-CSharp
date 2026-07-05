@@ -1,5 +1,6 @@
-﻿using System.Net;
-using Morph.Core;
+﻿using Morph.Core;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Morph.Internet
 {
@@ -15,23 +16,9 @@ namespace Morph.Internet
             //  Read host
             IPAddress address;
             if (hasURI)
-                try
-                { //  String
-                    address = IPAddress.Parse(reader.ReadString());
-                }
-                catch
-                {
-                    throw new EMorph("Invalid IPv4 Address");
-                }
+                address = URIToAddress(reader.ReadString(), AddressFamily.InterNetwork);
             else
-            { //  Binary
-                byte[] host = new byte[4];
-                host[0] = (byte)reader.ReadInt8();
-                host[1] = (byte)reader.ReadInt8();
-                host[2] = (byte)reader.ReadInt8();
-                host[3] = (byte)reader.ReadInt8();
-                address = new IPAddress(host);
-            }
+                address = new IPAddress(reader.ReadBytes(4));
             //  Read port
             int port = LinkInternet.MorphPort;
             if (hasPort)

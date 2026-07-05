@@ -158,7 +158,12 @@ namespace Morph.Params
                 instance = Activator.CreateInstance(type);
             //  Read the parameters into the instance
             for (int i = value.Struct.Count - 1; i >= 0; i--)
-                type.GetField(value.Struct.Names[i]).SetValue(instance, value.Struct.Values[i]);
+            {
+                FieldInfo field = type.GetField(value.Struct.Names[i]);
+                if (field == null)
+                    EMorph.Throw(EMorph.Any, "The struct type " + value.TypeName + " does not have a field named " + value.Struct.Names[i] + ".", null);
+                field.SetValue(instance, value.Struct.Values[i]);
+            }
             //  Return success
             return true;
         }

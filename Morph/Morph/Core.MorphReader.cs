@@ -15,12 +15,12 @@ namespace Morph.Core
             switch (byteCountSize)
             {
                 case 0: return ReadInt8();
-                case 1: return ReadInt16();
+                case 1: return ReadInt16() & 0xFFFF;
                 case 2: return ReadInt32();
                 case 3:
                     { //  This implementation cannot handle byte lengths greater than int.MaxValue because of limitations in the Stream class.
                         long count = ReadInt64();
-                        if (count >= int.MaxValue)
+                        if ((count < 0) || (count > int.MaxValue))
                             throw new EMorphImplementation();
                         return (int)count;
                     }
@@ -126,12 +126,12 @@ namespace Morph.Core
         //  ByteCountSize limited to 0..3
         public string ReadString(byte byteCountSize, bool asUnicode)
         {
-            return ReadChars(ReadByteCount(byteCountSize), true);
+            return ReadChars(ReadByteCount(byteCountSize), asUnicode);
         }
 
         public string ReadIdentifier()
         {
-            return ReadChars(ReadInt16(), true);
+            return ReadChars(ReadInt16() & 0xFFFF, true);
         }
 
         public virtual string ReadChars(int byteCount, bool asUnicode)
@@ -179,6 +179,8 @@ namespace Morph.Core
 
         public override byte ReadInt8()
         {
+            if (_stream.Remaining <= 0)
+                throw new EMorph("EOS");
             return (byte)_stream.ReadByte();
         }
 
@@ -222,6 +224,7 @@ namespace Morph.Core
 
         public override MorphReaderSized SubReader(int count)
         {
+            ValidateRead(count);
             try
             {
                 return new MorphReaderSized(_bytes, _pos, count);
@@ -248,7 +251,7 @@ namespace Morph.Core
 
         private void ValidateRead(int count)
         {
-            if (_pos + count > _end)
+            if ((count < 0) || (count > _end - _pos))
                 throw new EMorph("EOS");
         }
 

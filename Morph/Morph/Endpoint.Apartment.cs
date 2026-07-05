@@ -106,7 +106,9 @@ namespace Morph.Endpoint
 
         public void ActionLast(LinkMessage message)
         {
-            message.CreateReply().NextLinkAction();
+            LinkMessage reply = message.CreateReply();
+            if (reply != null)
+                reply.NextLinkAction();
         }
 
         #endregion
@@ -173,7 +175,8 @@ namespace Morph.Endpoint
             {
                 List<MorphApartment> allApartments = s_all.List();
                 foreach (MorphApartment apartment in allApartments)
-                    apartment.Dispose();
+                    if (apartment.Owner == this)
+                        apartment.Dispose();
             }
         }
     }

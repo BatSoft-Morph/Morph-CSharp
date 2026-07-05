@@ -48,7 +48,10 @@ namespace Morph.Lib
         public void MoveTo(string subStr, bool absorb)
         {
             Validate();
-            _pos = _str.IndexOf(subStr, _pos);
+            int foundPos = _str.IndexOf(subStr, _pos);
+            if (foundPos < 0)
+                throw new StringParserException("Substring not found: " + subStr);
+            _pos = foundPos;
             if (absorb)
                 _pos += subStr.Length;
         }
@@ -57,7 +60,10 @@ namespace Morph.Lib
         {
             Validate();
             int oldPos = _pos;
-            _pos = _str.IndexOf(subStr, oldPos);
+            int foundPos = _str.IndexOf(subStr, oldPos);
+            if (foundPos < 0)
+                return null;
+            _pos = foundPos;
             int subStrLen = _pos - oldPos;
             if (absorb)
                 _pos += subStr.Length;
@@ -70,15 +76,17 @@ namespace Morph.Lib
         {
             Validate();
             int oldPos = _pos;
+            //  Find the earliest occurrence of any of the characters
             int newPos = Int32.MaxValue;
             foreach (char c in chars)
             {
-                int pos = _str.IndexOf(c, oldPos);
-                if (newPos < pos)
-                    pos = newPos;
+                int iPos = _str.IndexOf(c, oldPos);
+                if ((iPos >= 0) && (iPos < newPos))
+                    newPos = iPos;
             }
             if (newPos == Int32.MaxValue)
                 return null;
+            _pos = newPos;
             int subStrLen = _pos - oldPos;
             if (absorb)
                 _pos++;

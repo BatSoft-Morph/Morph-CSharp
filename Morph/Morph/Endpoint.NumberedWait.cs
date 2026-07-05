@@ -57,6 +57,7 @@ namespace Morph.Endpoint
             internal AutoResetEvent _gate = new AutoResetEvent(false);
             internal bool _hold = false;
             internal bool _held = false;
+            internal bool _abandoned = false;
         }
 
         private RegisterItems<NumberedWait> _waits = new RegisterItems<NumberedWait>();
@@ -103,12 +104,18 @@ namespace Morph.Endpoint
             {
                 //  Wait
                 bool result = wait._gate.WaitOne(timeout, false);
-                //  Might have been requested to hold
                 lock (wait)
-                    if (wait._hold)
-                        wait._gate.WaitOne();
-                //  Done
-                return result || wait._held;
+                    //  No reply is being assigned, so give up.  Marking abandoned (under the same lock
+                    //  that Hold() takes) stops a Hold() that is about to run from assigning a reply we
+                    //  will never collect.
+                    if (!wait._hold)
+                    {
+                        wait._abandoned = true;
+                        return result || wait._held;
+                    }
+                //  A reply is being assigned;  wait for End(), which follows AssignReply()
+                wait._gate.WaitOne();
+                return true;
             }
             finally
             {
@@ -124,14 +131,17 @@ namespace Morph.Endpoint
         public bool Hold(int id)
         {
             NumberedWait wait;
-            bool isFound = Find(id, out wait);
-            if (isFound)
-                lock (wait)
-                {
-                    wait._hold = true;
-                    wait._held = true;
-                }
-            return isFound;
+            if (!Find(id, out wait))
+                return false;
+            lock (wait)
+            {
+                //  The waiting thread has already given up, so there is no one to hold for
+                if (wait._abandoned)
+                    return false;
+                wait._hold = true;
+                wait._held = true;
+                return true;
+            }
         }
 
         public void End(int id)

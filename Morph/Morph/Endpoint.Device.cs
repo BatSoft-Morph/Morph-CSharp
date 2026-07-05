@@ -47,9 +47,10 @@ namespace Morph.Endpoint
 
         static public Device Find(LinkStack path)
         {
-            for (int i = s_all.Count - 1; i >= 0; i--)
-                if (path.Equals(s_all[i].Path))
-                    return s_all[i];
+            lock (s_all)
+                for (int i = s_all.Count - 1; i >= 0; i--)
+                    if (path.Equals(s_all[i].Path))
+                        return s_all[i];
             return null;
         }
 

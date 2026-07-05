@@ -38,7 +38,7 @@ namespace Morph.Core
                     _waitingFor = count;
             _gate.WaitOne();
             //  Stream may no longer be valid
-            if (_queue == null)
+            if (_totalRemaining < 0)
                 throw new ObjectDisposedException("MorphStream is disposed");
         }
 
@@ -69,7 +69,7 @@ namespace Morph.Core
 
         public byte Peek()
         {
-            if (_queue == null)
+            if (_totalRemaining < 0)
                 throw new ObjectDisposedException("MorphStream is disposed");
             WaitFor(1);
             lock (_segment)
@@ -105,7 +105,8 @@ namespace Morph.Core
 
         public override void Flush()
         {
-            _queue.Clear();
+            //  Writes go straight into the queue, so there is nothing buffered to flush.
+            //  (Clearing the queue here would discard received-but-unread data.)
         }
 
         public override long Length
@@ -121,13 +122,13 @@ namespace Morph.Core
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (buffer.Length < offset + count)
-                throw new ArgumentException();
             if (buffer == null)
                 throw new ArgumentNullException();
             if ((offset < 0) || (count < 0))
                 throw new ArgumentOutOfRangeException();
-            if (_queue == null)
+            if (buffer.Length < offset + count)
+                throw new ArgumentException();
+            if (_totalRemaining < 0)
                 throw new ObjectDisposedException("MorphStream is disposed");
             //  If no data is available, then we must wait
             _gate.WaitOne();

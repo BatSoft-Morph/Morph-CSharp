@@ -74,20 +74,20 @@ namespace Morph.Endpoint
                 //  Invoke the method
                 LinkData dataOut = Invoke(message, DevicePathOf(pathToSender), dataIn);
                 //  Send a reply
-                SendReply(message, apartment, dataOut, null);
+                SendReply(message, apartment, dataOut);
             }
             catch (EMorph x)
             {
-                SendReply(message, apartment, null, x);
+                SendReply(message, apartment, new LinkData(x));
             }
             catch (TargetInvocationException x)
             {
                 Exception y = x.InnerException;
-                SendReply(message, apartment, new LinkData(y), y);
+                SendReply(message, apartment, new LinkData(y));
             }
             catch (Exception x)
             {
-                SendReply(message, apartment, new LinkData(x), x);
+                SendReply(message, apartment, new LinkData(x));
             }
         }
 
@@ -102,7 +102,7 @@ namespace Morph.Endpoint
 
         #endregion
 
-        private void SendReply(LinkMessage message, MorphApartment apartment, Link payload, Exception error)
+        private void SendReply(LinkMessage message, MorphApartment apartment, Link payload)
         {
             //  Identify cases when we don't reply
             if (!message.HasCallNumber)
@@ -115,8 +115,8 @@ namespace Morph.Endpoint
                 pathFrom = new LinkStack();
             //  Build a destination (return) path
             LinkStack pathTo = null;
-            if (apartment is MorphApartmentSession)
-                pathTo = ((MorphApartmentSession)apartment).GenerateReturnPath();
+            if (apartment is MorphApartmentSession sessionApartment)
+                pathTo = sessionApartment.GenerateReturnPath();
             else if (message.HasPathFrom)
                 pathTo = EndpointPathOf(message.PathFrom);
             pathTo.Append(payload);

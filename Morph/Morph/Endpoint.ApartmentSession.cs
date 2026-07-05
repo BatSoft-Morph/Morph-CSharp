@@ -90,7 +90,7 @@ namespace Morph.Endpoint
             LinkStack ReturnPath = _path.Clone();
             ReturnPath.Push(_linkApartment);
             if (SequenceLevel != SequenceLevel.None)
-                Path.Append(_sequence.StartLink());
+                ReturnPath.Append(_sequence.StartLink());
             return ReturnPath;
         }
 
@@ -112,7 +112,8 @@ namespace Morph.Endpoint
             _defaultServletObjectFactory = defaultServletObject;
             _timeout = timeout;
             _sequenceLevel = sequenceLevel;
-            new Thread(new ThreadStart(ThreadExecute));
+            Thread timeoutThread = new Thread(new ThreadStart(ThreadExecute)) { IsBackground = true };
+            timeoutThread.Start();
         }
 
         #region IDisposable Members
@@ -147,12 +148,12 @@ namespace Morph.Endpoint
                     _threadWait.WaitOne();
                 else
                 { //  Might need to wait
-                    int wait = apartment._when.Subtract(DateTime.Now).Milliseconds;
-                    if (wait > 0)
+                    TimeSpan wait = apartment._when.Subtract(DateTime.Now);
+                    if (wait > TimeSpan.Zero)
                         _threadWait.WaitOne(wait, false);
                     else
-                    { //  Timed out, so remove apartment
-                        MorphApartmentFactory.UnregisterApartment(apartment);
+                    { //  Timed out, so remove and dispose the apartment
+                        apartment.Dispose();
                         lock (_timeouts)
                             _timeouts.Pop(apartment._bookmark);
                     }

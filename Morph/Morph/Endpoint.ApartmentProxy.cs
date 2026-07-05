@@ -194,10 +194,11 @@ namespace Morph.Endpoint
             MorphApartmentProxy newProxy = new MorphApartmentProxy(device, serviceName, timeout, instanceFactories);
             //  Establish connection
             newProxy.EstablishConnection();
-            //  Return the proxy object (removing redundancy)
+            //  Return the proxy object (removing redundancy).
+            //  The redundant proxy shares oldProxy's remote apartment, so dispose it locally only.
             MorphApartmentProxy oldProxy = device.Find(newProxy.ApartmentID);
             if (oldProxy != newProxy)
-                newProxy.Dispose();
+                newProxy.Dispose(false);
             return oldProxy;
         }
 
@@ -205,10 +206,24 @@ namespace Morph.Endpoint
 
         #region IDisposable Members
 
+        private bool _disposed = false;
+
         public void Dispose()
         {
+            Dispose(true);
+        }
+
+        //  notifyRemote:  when false, only local registrations are released and the remote apartment
+        //  is left alone (used when discarding a redundant proxy that shares another proxy's apartment).
+        private void Dispose(bool notifyRemote)
+        {
             lock (s_all)
+            {
+                if (_disposed)
+                    return;
+                _disposed = true;
                 s_all.Remove(this);
+            }
             if ((_device != null) && (ApartmentID != 0))
                 lock (_device._apartmentProxiesByApartmentID)
                     if (_device._apartmentProxiesByApartmentID[ApartmentID] == this)
@@ -218,7 +233,10 @@ namespace Morph.Endpoint
                 _sequenceSender.Halt();
                 _sequenceSender = null;
             }
-            EndConnection();
+            if (notifyRemote)
+                EndConnection();
+            //  Disposed properly, so the finalizer need not run
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -227,7 +245,14 @@ namespace Morph.Endpoint
 
         ~MorphApartmentProxy()
         {
-            Dispose();
+            //  A finalizer must not do network I/O nor let an exception escape;  release local state only
+            try
+            {
+                Dispose(false);
+            }
+            catch
+            {
+            }
         }
 
         #region RegisterItemID Members

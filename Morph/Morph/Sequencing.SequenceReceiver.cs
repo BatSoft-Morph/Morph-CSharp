@@ -23,6 +23,8 @@ namespace Morph.Sequencing
 
         public void Dispose()
         {
+            //  Stop the execution thread, then deregister
+            Stop(true);
             lock (SequenceReceivers.s_all)
                 SequenceReceivers.s_all.Remove(_sequenceID);
         }
@@ -89,7 +91,8 @@ namespace Morph.Sequencing
 
         internal void Stop(int index)
         {
-            throw new System.Exception("The method or operation is not implemented.");
+            //  'index' is the final index in the sequence;  stop gracefully once the queue has drained
+            Stop(false);
         }
 
         private void SendReply(LinkSequence linkReply)
@@ -131,8 +134,9 @@ namespace Morph.Sequencing
         {
             Thread.CurrentThread.Name = "Sequence";
             while (_sequenceImplementation.ExecutionIteration()) ;
-            //  Send termination message
-            //  SendReply(new LinkSequence(_CurrentIndex));
+            //  Thread is ending, so make sure the receiver is deregistered
+            lock (SequenceReceivers.s_all)
+                SequenceReceivers.s_all.Remove(_sequenceID);
         }
 
         private interface ISequenceImplementation
@@ -188,7 +192,7 @@ namespace Morph.Sequencing
             {
                 lock (_Owner._queue)
                 {
-                    if (_Owner._currentIndex <= newIndex)
+                    if (_Owner._currentIndex < newIndex)
                         _Owner._queue[newIndex] = message;
                     //  Make sure the execution thread is awake
                     _Owner._gate.Set();
@@ -273,9 +277,9 @@ namespace Morph.Sequencing
                         _Owner.SendReply(new LinkSequenceIndexReply(_Owner._senderID, Resends[i], true));
                     //  Wait for the earliest timeout to expire
                     //  Note: if EarliestDue = MaxValue, then _Gate will also be set, yielding no wait.
-                    int WaitTime = EarliestDue.Subtract(DateTime.Now).Milliseconds;
-                    if (WaitTime > 0)
-                        _Owner._gate.WaitOne(WaitTime, false);
+                    TimeSpan waitTime = EarliestDue.Subtract(DateTime.Now);
+                    if (waitTime > TimeSpan.Zero)
+                        _Owner._gate.WaitOne(waitTime, false);
                 }
                 return true;
             }

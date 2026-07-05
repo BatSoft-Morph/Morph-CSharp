@@ -1,6 +1,6 @@
-﻿using System.IO;
+﻿using Morph.Core;
 using System.Net;
-using Morph.Core;
+using System.Net.Sockets;
 
 namespace Morph.Internet
 {
@@ -14,36 +14,11 @@ namespace Morph.Internet
         static public LinkInternetIPv6 ReadNew(MorphReader reader, bool hasURI, bool hasPort)
         {
             //  Read host
-            string uri;
-            if (hasURI)
-                //  String
-                uri = reader.ReadString();
-            else
-            { //  Binary
-              //  Unfortunately one can't create an instance of IPAddress using short[8],
-              //  so we create a string that IPAddress is able to parse.
-                MorphWriter stream = new MorphWriter(new MemoryStream());
-                int i = 0;
-                do
-                {
-                    short value = (short)reader.ReadInt16();
-                    stream.WriteInt16(value);
-                    if (i == 8)
-                        break;
-                    stream.WriteString(":");
-                } while (true);
-                uri = stream.ToString();
-            }
-            //  Parse the address
             IPAddress address;
-            try
-            {
-                address = IPAddress.Parse(uri);
-            }
-            catch
-            {
-                throw new EMorph("Invalid IPv6 Address");
-            }
+            if (hasURI)
+                address = URIToAddress(reader.ReadString(), AddressFamily.InterNetworkV6);
+            else
+                address = new IPAddress(reader.ReadBytes(16));
             //  Read port
             int port = LinkInternet.MorphPort;
             if (hasPort)

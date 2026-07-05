@@ -83,8 +83,12 @@ namespace Morph.Sequencing
                 throw new EMorph("At sequence, SenderID cannot be 0.");
             SequenceReceiver sequence;
             if (_sequenceID == 0)
-                //  Start new sequence
+            { //  Start new sequence
                 sequence = SequenceReceivers.New(_IsLossless);
+                //  The receiver replies (acks/resend requests) back along the sender's path
+                if (message.PathFrom != null)
+                    sequence.PathToProxy = message.PathFrom.Clone();
+            }
             else
             { //  Find existing sequence
                 sequence = SequenceReceivers.Find(_sequenceID);

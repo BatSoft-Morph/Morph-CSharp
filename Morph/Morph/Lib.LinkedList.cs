@@ -38,7 +38,7 @@ namespace Morph.Lib.LinkedList
 
         private void DisassembleList(LinkedListLinkTwoWay<T> link)
         {
-            if (_left != null)
+            if (link != null)
             {
                 link[false] = null;
                 DisassembleList(link[true]);
@@ -64,6 +64,8 @@ namespace Morph.Lib.LinkedList
         public IBookmark PushLeft(T data)
         {
             LinkedListLinkTwoWay<T> link = new LinkedListLinkTwoWay<T>(data, null, _left);
+            if (_left != null)
+                _left[false] = link;
             _left = link;
             if (_right == null)
                 _right = link;
@@ -73,6 +75,8 @@ namespace Morph.Lib.LinkedList
         public IBookmark PushRight(T data)
         {
             LinkedListLinkTwoWay<T> link = new LinkedListLinkTwoWay<T>(data, _right, null);
+            if (_right != null)
+                _right[true] = link;
             _right = link;
             if (_left == null)
                 _left = link;
@@ -134,6 +138,8 @@ namespace Morph.Lib.LinkedList
             Pop(bookmark);
             LinkedListLinkTwoWay<T> link = (LinkedListLinkTwoWay<T>)bookmark;
             link[true] = _left;
+            if (_left != null)
+                _left[false] = link;
             _left = link;
             if (_right == null)
                 _right = link;
@@ -146,6 +152,8 @@ namespace Morph.Lib.LinkedList
             Pop(bookmark);
             LinkedListLinkTwoWay<T> link = (LinkedListLinkTwoWay<T>)bookmark;
             link[false] = _right;
+            if (_right != null)
+                _right[true] = link;
             _right = link;
             if (_left == null)
                 _left = link;

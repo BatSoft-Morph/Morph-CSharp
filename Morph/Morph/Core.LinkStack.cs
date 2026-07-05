@@ -14,7 +14,6 @@ namespace Morph.Core
         {
             _links = new List<Link>();
             _reader = reader;
-            ToString();
         }
 
         public LinkStack(byte[] bytes)

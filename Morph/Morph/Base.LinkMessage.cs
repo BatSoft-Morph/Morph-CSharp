@@ -185,7 +185,7 @@ namespace Morph.Base
         {
             if (!HasPathFrom)
                 return null;
-            LinkMessage reply = new LinkMessage(PathFrom, HasPathFrom ? new LinkStack() : null, _isForceful);
+            LinkMessage reply = new LinkMessage(PathFrom.Clone(), new LinkStack(), _isForceful);
             if (HasCallNumber)
                 reply.CallNumber = CallNumber;
             reply.IsForceful = IsForceful;
@@ -196,7 +196,7 @@ namespace Morph.Base
         {
             if (!HasPathFrom)
                 return null;
-            LinkMessage reply = new LinkMessage(PathFrom, null, _isForceful);
+            LinkMessage reply = new LinkMessage(PathFrom.Clone(), null, _isForceful);
             if (HasCallNumber)
                 reply.CallNumber = CallNumber;
             reply.IsForceful = IsForceful;

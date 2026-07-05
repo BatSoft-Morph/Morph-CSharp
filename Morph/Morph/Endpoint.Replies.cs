@@ -82,7 +82,7 @@ namespace Morph.Endpoint
                 //  Collect information about the exception
                 int errorCode = reply.LinkData.ErrorCode;
                 string message = null;
-                string trace = reply.ReverseFromPath.ToString();
+                string trace = reply.ReverseFromPath == null ? "" : reply.ReverseFromPath.ToString();
                 if (special != null)
                     if (special is ValueInstance error)
                     {

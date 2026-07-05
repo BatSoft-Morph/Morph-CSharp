@@ -92,6 +92,8 @@ namespace Morph.Core
         public void WriteIdentifier(string value)
         {
             byte[] buffer = Unicode.GetBytes(value);
+            if (buffer.Length > 0xFFFF)
+                throw new EMorph("Identifier is too long to encode in a 2 byte length");
             WriteInt16(buffer.Length);
             _stream.Write(buffer, 0, buffer.Length);
         }
@@ -119,19 +121,15 @@ namespace Morph.Core
 
         public void WriteStream(MorphReader reader, int count)
         {
-            if (count == 0)
-                return;
-            byte[] buffer = new byte[count < BufferSize ? count : BufferSize];
-            int length;
-            do
+            //  ReadBytes(chunk) returns exactly 'chunk' bytes or throws EMorph("EOS"), so a reader
+            //  with fewer than 'count' bytes raises EOS rather than looping forever.
+            while (count > 0)
             {
-                length = reader.ReadBytes(buffer);
-                _stream.Write(buffer, 0, length);
-                count -= length;
+                int chunk = count < BufferSize ? count : BufferSize;
+                byte[] buffer = reader.ReadBytes(chunk);
+                _stream.Write(buffer, 0, buffer.Length);
+                count -= buffer.Length;
             }
-            while ((count > 0) && (length > 0));
-            if (count > 0)
-                throw new EMorph("EOS");
         }
 
         public byte[] ToArray()

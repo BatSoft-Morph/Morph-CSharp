@@ -31,9 +31,13 @@
         {
             lock (this)
             {
+                //  Valid IDs are {1..0x7FFFFFFF};  wrap back to 1 after the last, without overflowing
+                int result = _seed;
                 if (_seed == int.MaxValue)
                     _seed = 1;
-                return _seed++;
+                else
+                    _seed++;
+                return result;
             }
         }
 

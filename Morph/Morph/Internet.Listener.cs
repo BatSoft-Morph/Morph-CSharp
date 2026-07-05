@@ -35,14 +35,34 @@ namespace Morph.Internet
         private void AsynchListen()
         {
             Thread.CurrentThread.Name = "Listener";
+            //  Work against a local reference so that Stop() nulling the field cannot cause a race
+            Socket listener = _listener;
             try
             {
                 try
                 {
-                    _listener.Bind(_endPoint);
-                    _listener.Listen(5);
+                    listener.Bind(_endPoint);
+                    listener.Listen(5);
                     while (_isStarted)
-                        Connections.Add(_listener.Accept());
+                    {
+                        Socket socket = listener.Accept();
+                        try
+                        {
+                            Connections.Add(socket);
+                        }
+                        catch (Exception x)
+                        {
+                            //  One faulty incoming connection must not bring down the listener
+                            MorphErrors.NotifyAbout(this, x);
+                            try
+                            {
+                                socket.Close();
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
                 }
                 finally
                 {
@@ -52,7 +72,8 @@ namespace Morph.Internet
             }
             catch (Exception x)
             {
-                MorphErrors.NotifyAbout(this, x);
+                if (_isStarted)
+                    MorphErrors.NotifyAbout(this, x);
             }
         }
 
@@ -74,13 +95,14 @@ namespace Morph.Internet
                     try
                     {
                         _isStarted = true;
-                        (new Thread(new ThreadStart(AsynchListen))).Start();
                         _isActive = true;
+                        (new Thread(new ThreadStart(AsynchListen))).Start();
                     }
                     //  Just in case
                     catch
                     {
                         _isStarted = false;
+                        _isActive = false;
                         _listener.Close();
                         _listener = null;
                         throw;
@@ -168,14 +190,17 @@ namespace Morph.Internet
         {
             if (!IsLocal(endPoint.Address))
                 throw new EMorphUsage("Not a local IP address");
-            //  See if it already exists
-            Listener portListener = Find(endPoint);
-            if (portListener == null)
-            { //  Create and register the listener
-                portListener = new Listener(endPoint);
-                s_all.Add(portListener);
+            lock (s_all)
+            {
+                //  See if it already exists
+                Listener portListener = Find(endPoint);
+                if (portListener == null)
+                { //  Create and register the listener
+                    portListener = new Listener(endPoint);
+                    s_all.Add(portListener);
+                }
+                return portListener;
             }
-            return portListener;
         }
 
         static public Listeners Obtain(int port)
@@ -201,18 +226,20 @@ namespace Morph.Internet
 
         static public Listener Find(IPEndPoint endPoint)
         {
-            foreach (Listener listener in s_all)
-                if (listener.EndPoint.Equals(endPoint))
-                    return listener;
+            lock (s_all)
+                foreach (Listener listener in s_all)
+                    if (listener.EndPoint.Equals(endPoint))
+                        return listener;
             return null;
         }
 
         static public Listeners Find(IPAddress address)
         {
             List<Listener> items = new List<Listener>();
-            foreach (Listener listener in s_all)
-                if (listener.EndPoint.Address.Equals(address))
-                    items.Add(listener);
+            lock (s_all)
+                foreach (Listener listener in s_all)
+                    if (listener.EndPoint.Address.Equals(address))
+                        items.Add(listener);
             return new Listeners(items);
         }
 
@@ -220,27 +247,29 @@ namespace Morph.Internet
         {
             List<Listener> items = new List<Listener>();
             //  Add all network addresses to result
-            foreach (Listener listener in s_all)
-                if (listener.EndPoint.Port == port)
-                    items.Add(listener);
+            lock (s_all)
+                foreach (Listener listener in s_all)
+                    if (listener.EndPoint.Port == port)
+                        items.Add(listener);
             //  Return a list of listeners
             return new Listeners(items);
         }
 
         static public Listeners FindAll()
         {
-            return new Listeners(s_all);
+            lock (s_all)
+                return new Listeners(new List<Listener>(s_all));
         }
 
         static public void StartAll()
         {
-            foreach (Listener listener in s_all)
+            foreach (Listener listener in FindAll().ToArray())
                 listener.Start();
         }
 
         static public void StopAll()
         {
-            foreach (Listener listener in s_all)
+            foreach (Listener listener in FindAll().ToArray())
                 listener.Stop();
         }
 

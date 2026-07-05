@@ -139,6 +139,12 @@ namespace Morph.Params
 
         static private void EncodeArray(MorphWriter writer, InstanceFactories instanceFactories, string valueName, Array array)
         {
+            //  TODO: Morph represents a multidimensional array as nested arrays - one array ValueType
+            //  per dimension - so an N-dimensional CLR array should encode as N nested arrays rather
+            //  than being rejected.  Until that is implemented, reject here (before writing anything, so
+            //  a failure does not corrupt the message being built).  See Specifications/Backlog.md.
+            if (array.Rank != 1)
+                throw new EMorph("Multidimensional arrays are not yet implemented on this side");
             Type elementType = array.GetType().GetElementType();
             //  Non-nullable simple elements are all of the one type, so per-element ValueTypes can be omitted
             byte elemSimpleType = 0;

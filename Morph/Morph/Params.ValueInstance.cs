@@ -68,7 +68,7 @@ namespace Morph.Params
 
         public bool HasName(string name)
         {
-            return _names.IndexOf(name) < 0;
+            return _names.IndexOf(name) >= 0;
         }
 
         public object ByName(string name)

@@ -1,7 +1,7 @@
-﻿using System.Net;
-using System.Net.Sockets;
-using Morph.Base;
+﻿using Morph.Base;
 using Morph.Core;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Morph.Internet
 {
@@ -11,6 +11,17 @@ namespace Morph.Internet
           : base(LinkTypeID.Internet)
         {
             _endPoint = endPoint;
+        }
+
+        static protected IPAddress URIToAddress(string uri, AddressFamily addressFamily)
+        {
+            IPAddress[] addresses = Dns.GetHostAddresses(uri);
+            if (addresses.Length == 0)
+                throw new EMorph("Invalid IP Address");
+            foreach (IPAddress address in addresses)
+                if (address.AddressFamily == addressFamily)
+                    return address;
+            throw new EMorph(EMorph.Any, $"Invalid {addressFamily} Address");
         }
 
         public const int MorphPort = 0x3000;
