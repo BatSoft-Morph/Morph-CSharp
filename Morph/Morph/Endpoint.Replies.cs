@@ -72,7 +72,7 @@ namespace Morph.Endpoint
             }
             //  Decode reply
             object special = null;
-            if (hasSpecial)
+            if (reply.LinkData.IsException || hasSpecial)
                 Parameters.Decode(reply.InstanceFactories, reply.Device.Path, reply.LinkData.Reader, out Params, out special);
             else
                 Parameters.Decode(reply.InstanceFactories, reply.Device.Path, reply.LinkData.Reader, out Params);
