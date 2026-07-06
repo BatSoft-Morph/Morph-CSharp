@@ -105,7 +105,7 @@ namespace Morph.Lib
 
         public string ReadChars(char[] chars)
         {
-            Validate();
+            //  At end-of-string there are simply no characters to read - return null, do not throw
             int oldPos = _pos;
             while ((_pos < _len) && CharInChars(_str[_pos], chars))
                 _pos++;
@@ -116,7 +116,9 @@ namespace Morph.Lib
 
         public bool ReadChar(char Char)
         {
-            Validate();
+            //  At end-of-string the requested character is not there - return false, do not throw
+            if (_pos >= _len)
+                return false;
             if (_str[_pos] != Char)
                 return false;
             _pos++;
