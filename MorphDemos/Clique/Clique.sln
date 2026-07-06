@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clique.Win", "Clique.Win\Cl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Morph.Daemon.Client", "..\..\Morph\Morph.Daemon.Client\Morph.Daemon.Client.csproj", "{CBE2A2F9-1B62-4DB3-8DB8-E8BBEF96F116}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clique.Maui", "Clique.Maui\Clique.Maui.csproj", "{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,18 @@ Global
 		{CBE2A2F9-1B62-4DB3-8DB8-E8BBEF96F116}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{CBE2A2F9-1B62-4DB3-8DB8-E8BBEF96F116}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{CBE2A2F9-1B62-4DB3-8DB8-E8BBEF96F116}.Release|x86.ActiveCfg = Release|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Debug|x86.Build.0 = Debug|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Release|x86.ActiveCfg = Release|Any CPU
+		{DD209F53-EBCC-4D6C-85FE-2E578D7AC78E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

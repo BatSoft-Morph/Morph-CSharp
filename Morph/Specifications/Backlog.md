@@ -51,6 +51,30 @@ are blocked" claim was a demo mis-wiring, not a library gap.
 `Morph.Daemon/LinkType.LinkService.cs` and `Morph.Daemon/RunningService.cs` are not in
 the csproj and describe an older architecture. Decide: delete, or keep for reference.
 
+### 9. `ViaString` with a blank address resolves to localhost
+With the `StringParser` crash fixed (see "Resolved this session"), a blank address now falls
+through to `Dns.GetHostEntry("")`, which .NET resolves to **localhost** — so Connect silently
+targets the local machine instead of erroring. Decide where to guard a blank address: demo-side
+(each `…Connect_Click` checks its field) or, cleaner, core-side (`MorphApartmentProxy.Resolve`
+rejects a blank address with a clear `EMorph`). Peter to choose; I lean core-side.
+
+### 10. Should MAUI Clique peers accept inbound connections?
+A daemon-less Clique peer starts no `ListenerManager`, so it cannot receive an *unsolicited*
+inbound connection (chat still works over the connection the initiator opens). Inherited from
+`Clique.Droid`. Adding `ListenerManager.Obtain(LinkInternet.MorphPort).StartAll()` in `MauiProgram`
+would enable inbound. Left out to stay faithful — decision pending. Details in `Maui-Demos.md`.
+
+### 11. Minor known issues (low priority)
+- **WinForms `BookingServer` runs headless** — its `Program.Main` has `Application.Run(new
+  BookingServerForm())` commented out, so it registers the service and stays alive on foreground
+  worker threads but shows **no window**. It looks like it failed to launch; it hasn't. (This
+  misled the "why doesn't the server show in the Manager" diagnosis — the real cause there was
+  running a stale pre-migration exe.)
+- **`Morph.Daemon/ServiceDaemon.cd`** class diagram still shows `DaemonStartup` without the new
+  `parameters` field — cosmetic (a VS diagram, not compiled).
+- **`Test.Bat.Library.Settings`** has ~3 failing tests from a hard-coded `C:\Temp\Settings.xml`
+  path — environmental, pre-existing, unrelated to this session.
+
 ## Tooling and project format
 
 All legacy `.csproj` files were migrated to SDK-style (target frameworks unchanged: net48
@@ -121,7 +145,7 @@ From the multi-agent defect review, these were investigated and are **correct as
   restart. **Rejected** that ownership. Now the **daemon owns and persists** it (`Morph.Daemon/
   StartupStore.cs`): it loads on `DoStart` (registering each so services launch on demand) and
   rewrites on every `StartupImpl.Add`/`Remove`. Store is JSON — **Debug** build: beside the daemon
-  exe (`bin\Debug\Startups.json`); **Release** build: `%ProgramData%\Morph\Startups.json` (chosen
+  exe (`bin\Debug\Morph.Daemon.json`); **Release** build: `%ProgramData%\Morph\Morph.Daemon.json` (chosen
   via `#if DEBUG`). The Manager is now a thin UI over the daemon's `Morph.Startup` service
   (`Morph.Manager/Services/StartupStore.cs` deleted; `StartupsViewModel` lists/adds/removes only
   through the daemon). The wire `DaemonStartup` struct gained a `parameters` field (both ends) so
@@ -133,3 +157,19 @@ From the multi-agent defect review, these were investigated and are **correct as
   added at `3572558` and removed at `64fe434`. The new JSON store keeps the **identical fields**,
   so nothing is lost; it also fixes the old per-user `HKCU` scope (wrong for a service) by using
   machine-wide `%ProgramData%\Morph\` in Release. No registry remnants remain (verified).
+  (Store file is `Morph.Daemon.json`.)
+- Booking and Clique demos converted to MAUI (see `Maui-Demos.md`): `BookingServer.Maui` (Windows,
+  MorphManager + `StartServiceSessioned`, TreeView → grouped `CollectionView`) + `BookingClient.Maui`
+  (Windows+Android, pure client); `Clique.Maui` (Windows+Android, daemon-less peer, ListView →
+  `CollectionView`). Shared libs `Booking` and `CliqueInterface` retargeted `net48 → netstandard2.0`.
+  `Booking.sln` and `Clique.sln` build green end-to-end (0/0); WinForms and Basic still build.
+  Build-verified only; on-device runtime pending. Open follow-ups: Clique inbound listener (item 10);
+  Booking server Morph-logic duplicated into `.Maui` rather than shared.
+- **`ViaString` no longer throws on a blank/invalid address** (core bug, Peter 2026-07-06). The
+  best-effort IPv4 parser (`MorphApartmentProxy.ResolveIPv4`) is meant to return null so `Resolve`
+  falls back to DNS, but `StringParser.ReadChars`/`ReadChar` threw `StringParserException("End of
+  string…")` at end-of-string — so an empty (or trailing-dot) address crashed Connect in every demo
+  instead of resolving. Fixed at the parser: those two *try-to-read* methods now return null/false at
+  end-of-string (used **only** by the IPv4 resolver, so zero blast radius). Regression tests added
+  (`StringParserTests`, 4). Not a regression from this session — `ReadChars` had thrown at end since
+  the original commit. Follow-up: blank-address behaviour (item 9).

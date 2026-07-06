@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookingClient.Maui.MainPage"
+             Title="Booking Client">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="10">
+            <Label Text="Morph — Booking demo client" FontSize="20" FontAttributes="Bold" />
+
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                  ColumnSpacing="10" RowSpacing="8">
+                <Label Grid.Row="0" Grid.Column="0" Text="Host" VerticalOptions="Center" />
+                <Entry Grid.Row="0" Grid.Column="1" x:Name="HostEntry" Text="127.0.0.1" />
+
+                <Label Grid.Row="1" Grid.Column="0" Text="Client name" VerticalOptions="Center" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="ClientNameEntry" Text="User1" TextChanged="OnNamesChanged" />
+
+                <Label Grid.Row="2" Grid.Column="0" Text="Object name" VerticalOptions="Center" />
+                <Entry Grid.Row="2" Grid.Column="1" x:Name="ObjectNameEntry" Text="Object123" TextChanged="OnNamesChanged" />
+
+                <Label Grid.Row="3" Grid.Column="0" Text="Current owner" VerticalOptions="Center" />
+                <Entry Grid.Row="3" Grid.Column="1" x:Name="OwnerEntry" IsEnabled="False" />
+            </Grid>
+
+            <FlexLayout Wrap="Wrap">
+                <Button x:Name="RequestButton" Text="Request" Clicked="OnRequest" />
+                <Button x:Name="ReleaseButton" Text="Release" Clicked="OnRelease" IsEnabled="False" />
+                <Button x:Name="NudgeButton" Text="Nudge" Clicked="OnNudge" IsEnabled="False" />
+            </FlexLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

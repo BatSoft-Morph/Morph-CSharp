@@ -1,6 +1,8 @@
 # MAUI conversion of the demos
 
-Converting the WinForms demo UIs (`MorphDemos/`) to .NET MAUI. In progress.
+Converting the WinForms demo UIs (`MorphDemos/`) to .NET MAUI. All three demos (Basic, Booking,
+Clique) are now converted and build-verified (0 warnings, both TFMs); live/on-device runtime
+testing remains.
 
 ## Decisions (Peter, 2026-07-05)
 
@@ -23,7 +25,7 @@ Converting the WinForms demo UIs (`MorphDemos/`) to .NET MAUI. In progress.
 - **Shared demo libraries** (`Basic`, `Booking`, `CliqueInterface`, `MorphDemoSync`) are
   retargeted `net48 → netstandard2.0` so both WinForms and MAUI can reference them (they are
   pure Morph logic, no UI).
-- **Sequence:** pilot with Basic first (done), then Booking, then Clique.
+- **Sequence:** pilot with Basic first, then Booking, then Clique. (Doneness tracked under *Status*.)
 
 ## Conversion recipe (established by the Basic pilot — reuse for Booking & Clique)
 
@@ -53,15 +55,34 @@ Converting the WinForms demo UIs (`MorphDemos/`) to .NET MAUI. In progress.
   (Windows + Android, **pure client** — `Morph` library only, no `Morph.Daemon.Client`); both
   build clean (0 warnings), added to `Basic.sln`; WinForms Basic still builds. The dead
   `Morph.Daemon.Client` reference was also dropped from the shared `Basic` library.
-- **Booking — todo.** Adds a `TreeView` → `CollectionView` (server shows a live registration tree).
-- **Clique — todo.** `ListView` → `CollectionView` chat UI, built fresh as a MAUI app. (The old
-  Xamarin `Clique.Droid` has been **deleted** — see Backlog item 7 — so there is nothing to fold in.)
+- **Booking — done.** `BookingServer.Maui` (Windows, `MorphManager` + `StartServiceSessioned`; the
+  WinForms `treeBooking` TreeView is now a grouped `CollectionView`), `BookingClient.Maui`
+  (Windows + Android, pure client). `Booking` lib retargeted to netstandard2.0; both added to
+  `Booking.sln`; WinForms Booking still builds; whole `Booking.sln` builds 0/0. Notes: the pure
+  client gained a **Host** entry (default `127.0.0.1`) because `ViaString` needs a target address
+  (the WinForms client hard-wired the local daemon via `ViaLocal`); the server's Morph-logic
+  classes (`BookingObjects`/`Factories`/`Server.cs`) are copied into `BookingServer.Maui` rather
+  than shared, matching the WinForms server's own-assembly layout; the client relies on
+  connection-close for booking release rather than an explicit pre-close `Unbook`.
+- **Clique — done.** `Clique.Maui` (Windows + Android) — a **daemon-less peer** built fresh (Morph
+  library only, replicating the deleted Xamarin `Clique.Droid`: link types + `SetThreadCount` +
+  `MorphServices.Register` via `MorphApartmentFactoryShared`). WinForms `lstFriends` ListView →
+  `CollectionView`. `CliqueInterface` retargeted to netstandard2.0; added to `Clique.sln`;
+  `Clique.Win` still builds; whole `Clique.sln` builds 0/0.
+
+### Clique known limitation — no unsolicited inbound connections (decision pending)
+A daemon-less Clique peer starts **no listener** (`MorphServices.Register` only registers the
+service locally; the `MorphPort` listener is started only by the daemon). So a MAUI Clique instance
+**cannot accept an inbound connection from a peer it has not itself dialled** — but chat still works
+bidirectionally over the connection the *initiator* opened (the other peer's diplomat callbacks
+route back over that same socket). Inherited from `Clique.Droid`, not a regression. To let a MAUI
+peer also *accept* inbound connections, add `ListenerManager.Obtain(LinkInternet.MorphPort).StartAll();`
+after `SetThreadCount(2)` in `MauiProgram` (and `…Find(…).StopAll();` on teardown). Left out to stay
+faithful to the original — **awaiting Peter's decision** on whether MAUI Clique peers should listen.
 
 ## Status of the Android runtime path
 
-The earlier "Android can't complete a call" note was a **mis-wiring**, not a library limitation:
-the demo wrongly bootstrapped through `MorphManager` (the PC/daemon path), which eagerly
-connects to a local loopback daemon Android doesn't have. `BasicClient.Maui` now follows the
-proven pure-client pattern (per `Clique.Droid`), so that architectural blocker is gone.
-**Still pending:** an on-device/emulator run against a live `Basic` server to confirm the round
-trip end-to-end — the change is build-verified but not yet runtime-tested on Android.
+**Still pending for all three demos:** an on-device/emulator run against a live server to confirm
+the round trip end-to-end. The conversions are build-verified (0 warnings, both TFMs) but not yet
+runtime-tested on Android. (The earlier "Android can't complete a call" scare was a mis-wiring — the
+demo bootstrapped via `MorphManager`; the pure-client rule under *Decisions* above resolved it.)

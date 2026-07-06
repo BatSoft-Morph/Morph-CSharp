@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bat.Library.Logging", "..\..\Bat.Library\Bat.Library.Logging\Bat.Library.Logging.csproj", "{E7790225-AC41-4AA3-961D-6B9E8CD05B7E}"
@@ -12,6 +12,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClient", "BookingClient\BookingClient.csproj", "{BE48D95C-B618-44AA-ABA2-61CFDFA881A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingServer", "BookingServer\BookingServer.csproj", "{8E0898F5-6079-442F-805E-88FC8B8885F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingServer.Maui", "BookingServer.Maui\BookingServer.Maui.csproj", "{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClient.Maui", "BookingClient.Maui\BookingClient.Maui.csproj", "{956E7AE8-D581-4543-9EFC-BAC737722952}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +87,30 @@ Global
 		{8E0898F5-6079-442F-805E-88FC8B8885F3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{8E0898F5-6079-442F-805E-88FC8B8885F3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8E0898F5-6079-442F-805E-88FC8B8885F3}.Release|x86.ActiveCfg = Release|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Debug|x86.Build.0 = Debug|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Release|x86.ActiveCfg = Release|Any CPU
+		{AE63E544-D898-499B-AE2F-4E7F7C70B7BA}.Release|x86.Build.0 = Release|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Debug|x86.Build.0 = Debug|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Release|Any CPU.Build.0 = Release|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Release|x86.ActiveCfg = Release|Any CPU
+		{956E7AE8-D581-4543-9EFC-BAC737722952}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Clique.Maui.MainPage"
+             Title="Clique">
+    <Grid Padding="16" RowSpacing="10"
+          RowDefinitions="Auto,Auto,Auto,Auto,*">
+
+        <Label Grid.Row="0" Text="Morph — Clique peer chat" FontSize="20" FontAttributes="Bold" />
+
+        <!-- Connect out to a peer by IP address -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Entry Grid.Column="0" x:Name="HostEntry" Placeholder="Peer IP address" Text="192.168.0." />
+            <Button Grid.Column="1" x:Name="ConnectButton" Text="Connect" Clicked="OnConnect" />
+        </Grid>
+
+        <!-- My text, broadcast to friends as it changes -->
+        <Entry Grid.Row="2" x:Name="TextEntry" Text="Clique on MAUI" TextChanged="OnTextChanged" />
+
+        <Label Grid.Row="3" Text="Friends" FontAttributes="Bold" Margin="0,4,0,0" />
+
+        <!-- Friends list (WinForms ListView -> CollectionView) -->
+        <CollectionView Grid.Row="4" x:Name="FriendsView">
+            <CollectionView.EmptyView>
+                <Label Text="No friends yet — connect to a peer." TextColor="Gray" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding .}" Padding="4" FontSize="16" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>

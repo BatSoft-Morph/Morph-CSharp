@@ -10,17 +10,17 @@ namespace Clique.Interface
         public static CliqueInstanceFactories Factories = new CliqueInstanceFactories();
     }
 
-    public interface CliqueConnector
+    public interface ICliqueConnector
     {
-        CliqueDiplomat hello(CliqueDiplomat newFriend);
+        ICliqueDiplomat Hello(ICliqueDiplomat newFriend);
     }
 
-    public interface CliqueDiplomat
+    public interface ICliqueDiplomat
     {
-        string text { get; }
+        string Text { get; }
 
-        void changeText(CliqueDiplomat friend, string text);
+        void ChangeText(ICliqueDiplomat friend, string text);
 
-        void bye(CliqueDiplomat friend);
+        void Bye(ICliqueDiplomat friend);
     }
 }

@@ -39,7 +39,7 @@ namespace Clique.Win
 
     private void FormClique_FormClosing(object sender, FormClosingEventArgs e)
     {
-      //  Say bye to all friends before...
+      //  Say Bye to all friends before...
       CliqueObjects.Finalise();
       //  ...shutting down Morph communication (including any services such as Morph.Demo.Clique)
       MorphManager.Shutdown();
@@ -48,8 +48,8 @@ namespace Clique.Win
     private void buttonConnect_Click(object sender, EventArgs e)
     {
       MorphApartmentProxy ApartmentProxy = MorphApartmentProxy.ViaString(CliqueInterface.ServiceName, new TimeSpan(0, 0, 10), CliqueInterface.Factories, textIP.Text);
-      CliqueConnector RemoteConnector = new CliqueConnectorProxy(ApartmentProxy.DefaultServlet);
-      CliqueObjects.AddFriend(RemoteConnector.hello(CliqueObjects.MyDiplomat));
+      ICliqueConnector RemoteConnector = new CliqueConnectorProxy(ApartmentProxy.DefaultServlet);
+      CliqueObjects.AddFriend(RemoteConnector.Hello(CliqueObjects.MyDiplomat));
     }
 
     private void textText_TextChanged(object sender, EventArgs e)
@@ -57,22 +57,22 @@ namespace Clique.Win
       CliqueObjects.ChangeText(textText.Text);
     }
 
-    public void AddFriend(CliqueDiplomat friend)
+    public void AddFriend(ICliqueDiplomat friend)
     {
       ListViewItem Item = new ListViewItem();
-      Item.Text = friend.text;
+      Item.Text = friend.Text;
       Item.Tag = friend;
       listFriends.Items.Add(Item);
     }
 
-    public void DelFriend(CliqueDiplomat friend)
+    public void DelFriend(ICliqueDiplomat friend)
     {
       for (int i = 0; i < listFriends.Items.Count; i++)
         if (listFriends.Items[i].Tag == friend)
           listFriends.Items.RemoveAt(i);
     }
 
-    public void ChangeText(CliqueDiplomat friend, string text)
+    public void ChangeText(ICliqueDiplomat friend, string text)
     {
       for (int i = 0; i < listFriends.Items.Count; i++)
         if (listFriends.Items[i].Tag == friend)

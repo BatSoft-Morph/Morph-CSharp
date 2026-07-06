@@ -13,35 +13,35 @@ namespace Clique.Interface
         static public void Finalise()
         {
             //  Bye to all
-            List<CliqueDiplomat> friends = CliqueObjects._friends;
+            List<ICliqueDiplomat> friends = CliqueObjects._friends;
             for (int i = 0; i < friends.Count; i++)
-                friends[i].bye(_MyDiplomat);
+                friends[i].Bye(_MyDiplomat);
         }
 
         static internal CliqueDiplomatImpl _MyDiplomat;
-        static public CliqueDiplomat MyDiplomat
+        static public ICliqueDiplomat MyDiplomat
         {
             get { return _MyDiplomat; }
         }
 
-        static private List<CliqueDiplomat> _friends = new List<CliqueDiplomat>();
-        static public List<CliqueDiplomat> Friends
+        static private List<ICliqueDiplomat> _friends = new List<ICliqueDiplomat>();
+        static public List<ICliqueDiplomat> Friends
         {
             get
             { //  Returning a copy of the list, so that UI calls can take as long as they like
                 lock (_friends)
-                    return new List<CliqueDiplomat>(_friends);
+                    return new List<ICliqueDiplomat>(_friends);
             }
         }
 
-        static public void AddFriend(CliqueDiplomat NewFriend)
+        static public void AddFriend(ICliqueDiplomat NewFriend)
         {
             lock (_friends)
                 if (!_friends.Contains(NewFriend))
                     _friends.Add(NewFriend);
         }
 
-        static public void DelFriend(CliqueDiplomat NewFriend)
+        static public void DelFriend(ICliqueDiplomat NewFriend)
         {
             lock (_friends)
                 _friends.Remove(NewFriend);
@@ -50,26 +50,26 @@ namespace Clique.Interface
         static public void ChangeText(string text)
         {
             _MyDiplomat._text = text;
-            //  Tell friends about my new text
-            List<CliqueDiplomat> friends = Friends;
+            //  Tell friends about my new Text
+            List<ICliqueDiplomat> friends = Friends;
             for (int i = 0; i < friends.Count; i++)
-                friends[i].changeText(_MyDiplomat, _MyDiplomat.text);
+                friends[i].ChangeText(_MyDiplomat, _MyDiplomat.Text);
         }
     }
 
-    public abstract class CliqueConnectorImpl : MorphReference, CliqueConnector
+    public abstract class CliqueConnectorImpl : MorphReference, ICliqueConnector
     {
         public CliqueConnectorImpl()
           : base(CliqueInterface.ConnectorTypeName)
         {
         }
 
-        protected abstract void DoAddFriend(CliqueDiplomat Friend);
-        protected abstract void DoDelFriend(CliqueDiplomat Friend);
+        protected abstract void DoAddFriend(ICliqueDiplomat Friend);
+        protected abstract void DoDelFriend(ICliqueDiplomat Friend);
 
         #region CliqueConnector interface
 
-        public CliqueDiplomat hello(CliqueDiplomat newFriend)
+        public ICliqueDiplomat Hello(ICliqueDiplomat newFriend)
         {
             CliqueObjects.AddFriend(newFriend);
             DoAddFriend(newFriend);
@@ -79,7 +79,7 @@ namespace Clique.Interface
         #endregion
     }
 
-    public abstract class CliqueDiplomatImpl : MorphReference, CliqueDiplomat
+    public abstract class CliqueDiplomatImpl : MorphReference, ICliqueDiplomat
     {
         public CliqueDiplomatImpl()
           : base(CliqueInterface.DiplomatTypeName)
@@ -89,14 +89,14 @@ namespace Clique.Interface
         #region CliqueDiplomat interface
 
         internal string _text = "";
-        public string text
+        public string Text
         {
             get { return _text; }
         }
 
-        public abstract void changeText(CliqueDiplomat friend, string text);
+        public abstract void ChangeText(ICliqueDiplomat friend, string text);
 
-        public void bye(CliqueDiplomat friend)
+        public void Bye(ICliqueDiplomat friend)
         {
             CliqueObjects.DelFriend(friend);
         }

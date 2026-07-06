@@ -2,8 +2,8 @@
 
 namespace Clique.Win
 {
-    delegate void AddDelFriend(CliqueDiplomat friend);
-    delegate void ChangeText(CliqueDiplomat friend, string text);
+    delegate void AddDelFriend(ICliqueDiplomat friend);
+    delegate void ChangeText(ICliqueDiplomat friend, string text);
 
     public class CliqueConnectorWin : CliqueConnectorImpl
     {
@@ -15,12 +15,12 @@ namespace Clique.Win
 
         private FormClique _Form;
 
-        protected override void DoAddFriend(CliqueDiplomat Friend)
+        protected override void DoAddFriend(ICliqueDiplomat Friend)
         {
             _Form.Invoke(new AddDelFriend(_Form.AddFriend), new object[] { Friend });
         }
 
-        protected override void DoDelFriend(CliqueDiplomat Friend)
+        protected override void DoDelFriend(ICliqueDiplomat Friend)
         {
             _Form.Invoke(new AddDelFriend(_Form.DelFriend), new object[] { Friend });
         }
@@ -36,7 +36,7 @@ namespace Clique.Win
 
         private FormClique _Form;
 
-        public override void changeText(CliqueDiplomat friend, string text)
+        public override void ChangeText(ICliqueDiplomat friend, string text)
         {
             _Form.Invoke(new ChangeText(_Form.ChangeText), new object[] { friend, text });
         }

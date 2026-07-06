@@ -2,7 +2,7 @@ using Morph.Endpoint;
 
 namespace Clique.Interface
 {
-    public class CliqueConnectorProxy : CliqueConnector
+    public class CliqueConnectorProxy : ICliqueConnector
     {
         public CliqueConnectorProxy(ServletProxy Proxy)
           : base()
@@ -12,13 +12,13 @@ namespace Clique.Interface
 
         private ServletProxy _Proxy;
 
-        public CliqueDiplomat hello(CliqueDiplomat diplomat)
+        public ICliqueDiplomat Hello(ICliqueDiplomat diplomat)
         {
-            return (CliqueDiplomat)_Proxy.CallMethod("hello", new object[] { diplomat }, true);
+            return (ICliqueDiplomat)_Proxy.CallMethod("hello", new object[] { diplomat }, true);
         }
     }
 
-    public class CliqueDiplomatProxy : CliqueDiplomat
+    public class CliqueDiplomatProxy : ICliqueDiplomat
     {
         public CliqueDiplomatProxy(ServletProxy Proxy)
           : base()
@@ -28,17 +28,17 @@ namespace Clique.Interface
 
         private ServletProxy _Proxy;
 
-        public string text
+        public string Text
         {
             get { return (string)_Proxy.CallGetProperty("text", null); }
         }
 
-        public void changeText(CliqueDiplomat friend, string text)
+        public void ChangeText(ICliqueDiplomat friend, string text)
         {
             _Proxy.CallMethod("changeText", new object[] { friend, text }, false);
         }
 
-        public void bye(CliqueDiplomat friend)
+        public void Bye(ICliqueDiplomat friend)
         {
             _Proxy.SendMethod("bye", new object[] { friend });
         }
