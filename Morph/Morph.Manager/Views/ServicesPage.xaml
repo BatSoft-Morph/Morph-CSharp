@@ -7,12 +7,24 @@
              Title="Services">
     <Grid RowDefinitions="Auto,*,Auto" Padding="12" RowSpacing="8">
 
-        <!-- Column headers -->
+        <!-- Column headers (click to sort) -->
         <Grid Grid.Row="0" ColumnDefinitions="2*,*,*" Padding="12,8"
               BackgroundColor="{StaticResource AccentColour}">
-            <Label Grid.Column="0" Text="Service" Style="{StaticResource ColumnHeader}" />
-            <Label Grid.Column="1" Text="Local" Style="{StaticResource ColumnHeader}" />
-            <Label Grid.Column="2" Text="Remote" Style="{StaticResource ColumnHeader}" />
+            <Label Grid.Column="0" Text="{Binding ServiceHeader}" Style="{StaticResource ColumnHeader}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Service" />
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Grid.Column="1" Text="{Binding LocalHeader}" Style="{StaticResource ColumnHeader}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Local" />
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Grid.Column="2" Text="{Binding RemoteHeader}" Style="{StaticResource ColumnHeader}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Remote" />
+                </Label.GestureRecognizers>
+            </Label>
         </Grid>
 
         <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}">
@@ -20,6 +32,13 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ServiceRow">
                         <Grid ColumnDefinitions="2*,*,*" Padding="12,10">
+                            <FlyoutBase.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem x:DataType="vm:ServiceRow"
+                                                    Text="{Binding StartupMenuText}"
+                                                    Clicked="OnAddToStartupsClicked" />
+                                </MenuFlyout>
+                            </FlyoutBase.ContextFlyout>
                             <Label Grid.Column="0" Text="{Binding ServiceName}" />
                             <Label Grid.Column="1" Text="{Binding AccessLocal}" />
                             <Label Grid.Column="2" Text="{Binding AccessRemote}" />

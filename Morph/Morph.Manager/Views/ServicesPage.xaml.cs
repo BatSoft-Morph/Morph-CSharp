@@ -1,4 +1,5 @@
 using Microsoft.Maui.Controls;
+using Morph.Daemon.Client;
 using Morph.Endpoint;
 using Morph.Manager.ViewModels;
 using System;
@@ -30,6 +31,23 @@ namespace Morph.Manager.Views
 
         private async void OnRefreshClicked(object sender, EventArgs args)
             => await _viewModel.RefreshAsync();
+
+        //  Right-click a running service to register (or edit) its automatic startup.  The service
+        //  name is dictated by the service, so it is locked; the rest is pre-filled from the existing
+        //  startup when there is one, otherwise the user must browse to the hosting application.
+        private async void OnAddToStartupsClicked(object sender, EventArgs args)
+        {
+            ServiceRow row = (sender as MenuFlyoutItem)?.BindingContext as ServiceRow;
+            if (row == null)
+                return;
+            StartupEditPage editor = row.Startup.HasValue
+                ? StartupEditPage.ForExisting(row.ServiceName, row.Startup.Value.fileName, row.Startup.Value.parameters, row.Startup.Value.timeout)
+                : StartupEditPage.ForService(row.ServiceName);
+            await Navigation.PushModalAsync(editor);
+            StartupEditResult result = await editor.Result;
+            if (result != null)
+                await _viewModel.RegisterStartupAsync(result.ServiceName, result.FileName, result.Parameters, result.Timeout);
+        }
 
         private async void ShowException(Exception x)
         {

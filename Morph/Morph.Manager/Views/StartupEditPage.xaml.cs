@@ -21,10 +21,10 @@ namespace Morph.Manager.Views
     /// </summary>
     public partial class StartupEditPage : ContentPage
     {
-        private StartupEditPage(bool isNew)
+        private StartupEditPage(bool nameEditable)
         {
             InitializeComponent();
-            entryServiceName.IsEnabled = isNew;
+            entryServiceName.IsEnabled = nameEditable;
             stepperTimeout.Value = 10;
             ValidateValues();
         }
@@ -39,6 +39,19 @@ namespace Morph.Manager.Views
             page.entryFileName.Text = fileName;
             page.entryParameters.Text = parameters;
             page.stepperTimeout.Value = timeout;
+            page.ValidateValues();
+            return page;
+        }
+
+        /// <summary>
+        /// A new startup for a running service:  the service name is dictated by the service (so it
+        /// is locked and pre-filled), but the application file and the rest are not known - a running
+        /// service does not record what hosts it - so the user must fill them in.
+        /// </summary>
+        static public StartupEditPage ForService(string serviceName)
+        {
+            StartupEditPage page = new StartupEditPage(false);
+            page.entryServiceName.Text = serviceName;
             page.ValidateValues();
             return page;
         }

@@ -7,12 +7,24 @@
              Title="Startups">
     <Grid RowDefinitions="Auto,*,Auto" Padding="12" RowSpacing="8">
 
-        <!-- Column headers -->
+        <!-- Column headers (click to sort) -->
         <Grid Grid.Row="0" ColumnDefinitions="2*,*,3*" Padding="12,8"
               BackgroundColor="{StaticResource AccentColour}">
-            <Label Grid.Column="0" Text="Service" Style="{StaticResource ColumnHeader}" />
-            <Label Grid.Column="1" Text="Timeout (s)" Style="{StaticResource ColumnHeader}" />
-            <Label Grid.Column="2" Text="Application" Style="{StaticResource ColumnHeader}" />
+            <Label Grid.Column="0" Text="{Binding ServiceHeader}" Style="{StaticResource ColumnHeader}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Service" />
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Grid.Column="1" Text="{Binding TimeoutHeader}" Style="{StaticResource ColumnHeader}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Timeout" />
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Grid.Column="2" Text="{Binding ApplicationHeader}" Style="{StaticResource ColumnHeader}">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Application" />
+                </Label.GestureRecognizers>
+            </Label>
         </Grid>
 
         <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}">
