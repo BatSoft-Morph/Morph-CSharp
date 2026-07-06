@@ -15,12 +15,14 @@
                     <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Service" />
                 </Label.GestureRecognizers>
             </Label>
-            <Label Grid.Column="1" Text="{Binding LocalHeader}" Style="{StaticResource ColumnHeader}">
+            <Label Grid.Column="1" Text="{Binding LocalHeader}" Style="{StaticResource ColumnHeader}"
+                   HorizontalTextAlignment="Center">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Local" />
                 </Label.GestureRecognizers>
             </Label>
-            <Label Grid.Column="2" Text="{Binding RemoteHeader}" Style="{StaticResource ColumnHeader}">
+            <Label Grid.Column="2" Text="{Binding RemoteHeader}" Style="{StaticResource ColumnHeader}"
+                   HorizontalTextAlignment="Center">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Remote" />
                 </Label.GestureRecognizers>
@@ -40,8 +42,12 @@
                                 </MenuFlyout>
                             </FlyoutBase.ContextFlyout>
                             <Label Grid.Column="0" Text="{Binding ServiceName}" />
-                            <Label Grid.Column="1" Text="{Binding AccessLocal}" />
-                            <Label Grid.Column="2" Text="{Binding AccessRemote}" />
+                            <Label Grid.Column="1" HorizontalOptions="Center" FontSize="16"
+                                   Text="{Binding AccessLocal, Converter={StaticResource BoolToIcon}}"
+                                   TextColor="{Binding AccessLocal, Converter={StaticResource BoolToIconColour}}" />
+                            <Label Grid.Column="2" HorizontalOptions="Center" FontSize="16"
+                                   Text="{Binding AccessRemote, Converter={StaticResource BoolToIcon}}"
+                                   TextColor="{Binding AccessRemote, Converter={StaticResource BoolToIconColour}}" />
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

@@ -24,8 +24,8 @@ namespace Morph.Manager.ViewModels
         private readonly ListSorter<ServiceRow> _sorter = new ListSorter<ServiceRow>(
             "Service",
             new SortColumn<ServiceRow>("Service", "Service", (left, right) => CompareText(left.ServiceName, right.ServiceName)),
-            new SortColumn<ServiceRow>("Local", "Local", (left, right) => CompareText(left.AccessLocal, right.AccessLocal)),
-            new SortColumn<ServiceRow>("Remote", "Remote", (left, right) => CompareText(left.AccessRemote, right.AccessRemote)));
+            new SortColumn<ServiceRow>("Local", "Local", (left, right) => left.AccessLocal.CompareTo(right.AccessLocal)),
+            new SortColumn<ServiceRow>("Remote", "Remote", (left, right) => left.AccessRemote.CompareTo(right.AccessRemote)));
 
         public ICommand SortCommand { get; }
 
@@ -162,14 +162,14 @@ namespace Morph.Manager.ViewModels
         public ServiceRow(DaemonService service, DaemonStartup? startup)
         {
             ServiceName = service.serviceName;
-            AccessLocal = service.accessLocal ? "Yes" : "No";
-            AccessRemote = service.accessRemote ? "Yes" : "No";
+            AccessLocal = service.accessLocal;
+            AccessRemote = service.accessRemote;
             Startup = startup;
         }
 
         public string ServiceName { get; }
-        public string AccessLocal { get; }
-        public string AccessRemote { get; }
+        public bool AccessLocal { get; }
+        public bool AccessRemote { get; }
 
         /// <summary>The matching startup registration, when this service is set to start automatically.</summary>
         public DaemonStartup? Startup { get; }
