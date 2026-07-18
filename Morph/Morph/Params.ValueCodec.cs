@@ -234,19 +234,17 @@ namespace Morph.Params
             byte valueTypeByte = reader.ReadInt8();
             string typeName = (valueTypeByte & ValueType.HasTypeName) != 0 ? reader.ReadIdentifier() : null;
             valueName = (valueTypeByte & ValueType.HasValueName) != 0 ? reader.ReadIdentifier() : null;
+            //  Null:  nothing follows the names, whatever the other flags say
+            if ((valueTypeByte & ValueType.IsNull) != 0)
+                return null;
             //  References
             if ((valueTypeByte & ValueType.IsReference) != 0)
             {
                 int referenceID = reader.ReadInt32();
-                if ((valueTypeByte & ValueType.IsNull) != 0)
-                    return null;
                 if ((valueTypeByte & ValueType.IsServlet) != 0)
                     return DecodeServlet(reader, instanceFactories, devicePath, valueTypeByte, typeName, referenceID);
                 throw new EMorph("Stream references are not yet defined in the Morph Protocol");
             }
-            //  Null value
-            if ((valueTypeByte & ValueType.IsNull) != 0)
-                return null;
             //  Values
             switch (valueTypeByte & ValueType.ValueKindMask)
             {

@@ -31,7 +31,7 @@ namespace Morph.Tests
 
         [Test]
         public void Null_IsSingleIsNullByte()
-            => Assert.That(EncodedBytes(null), Is.EqualTo(new byte[] { 0x08 }));
+            => Assert.That(EncodedBytes(null), Is.EqualTo(new byte[] { 0x80 }));
 
         [Test]
         public void True_IsBooleanSimpleType0x84()

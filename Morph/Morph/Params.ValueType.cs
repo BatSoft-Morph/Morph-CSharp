@@ -10,10 +10,11 @@ namespace Morph.Params
 
         public const byte HasTypeName = 0x01;
         public const byte HasValueName = 0x02;
-        /// <summary>Unset means the value is sent by value.  Iff set, a 4 byte ReferenceID follows the names.</summary>
+        /// <summary>Unset means the value is sent by value.  Iff set and not IsNull, a 4 byte ReferenceID follows the names.</summary>
         public const byte IsReference = 0x04;
-        /// <summary>Only meaningful when encoding a value.  When decoding a type, ignore this flag.</summary>
-        public const byte IsNull = 0x08;
+        /// <summary>Iff set, nothing follows the names, whatever the other flags say.
+        /// Only meaningful when encoding a value.  When decoding a type, ignore this flag.</summary>
+        public const byte IsNull = 0x80;
 
         #endregion
 
@@ -28,9 +29,6 @@ namespace Morph.Params
         //  Array
         /// <summary>Iff set, all elements are of the one type declared up front, and elements are encoded without their own ValueTypes.</summary>
         public const byte IsArrayElemType = 0x40;
-
-        //  Custom
-        public const byte IsNullable = 0x40;
 
         #endregion
 
