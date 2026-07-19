@@ -182,11 +182,11 @@ namespace Morph.Params
             return result;
         }
 
-        /// <summary>An enum value's payload is its type name (a string:  4 byte count) followed by its ordinal.</summary>
+        /// <summary>An enum value's payload is its type name (an identifier:  2 byte count) followed by its ordinal.</summary>
         static public void WriteEnumValue(MorphWriter writer, object value)
         {
             Type enumType = value.GetType();
-            writer.WriteString(enumType.Name);
+            writer.WriteIdentifier(enumType.Name);
             WriteInteger(writer, Convert.ToInt64(value, CultureInfo.InvariantCulture), EnumSimpleTypeByte(enumType));
         }
 
@@ -361,7 +361,7 @@ namespace Morph.Params
             if ((simpleTypeByte & IsBool) != 0)
                 return Convert.ToUInt64(ReadInteger(reader, z, false), CultureInfo.InvariantCulture) != 0;
             //  Enum type name, then the ordinal
-            string enumTypeName = reader.ReadString();
+            string enumTypeName = reader.ReadIdentifier();
             object ordinal = ReadInteger(reader, z, false);
             Type enumType = instanceFactories?.FindEnumType(enumTypeName);
             if (enumType != null)
@@ -372,7 +372,7 @@ namespace Morph.Params
 
         static private object ReadEnumString(MorphReader reader, InstanceFactories instanceFactories)
         {
-            string enumTypeName = reader.ReadString();
+            string enumTypeName = reader.ReadIdentifier();
             //  "Values are comma delimited, without spaces.  Ending comma is ignored."
             string names = reader.ReadString().TrimEnd(',');
             Type enumType = instanceFactories?.FindEnumType(enumTypeName);

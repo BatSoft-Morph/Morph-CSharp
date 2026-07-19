@@ -37,13 +37,13 @@ namespace Morph.Endpoint
 
         public override int Size()
         {
-            return 5 + MorphWriter.SizeOfString(_name);
+            return 3 + MorphWriter.SizeOfString(_name);
         }
 
         public override void Write(MorphWriter writer)
         {
             writer.WriteLinkByte(LinkTypeID, true, _isSet, _hasIndex);
-            writer.WriteString(_name);
+            writer.WriteIdentifier(_name);
         }
 
         #endregion

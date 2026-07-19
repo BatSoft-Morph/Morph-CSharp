@@ -16,7 +16,7 @@ namespace Morph.Internet
             //  Read host
             IPAddress address;
             if (hasURI)
-                address = URIToAddress(reader.ReadString(), AddressFamily.InterNetwork);
+                address = URIToAddress(reader.ReadIdentifier(), AddressFamily.InterNetwork);
             else
                 address = new IPAddress(reader.ReadBytes(4));
             //  Read port
@@ -29,38 +29,22 @@ namespace Morph.Internet
 
         #region Link members
 
+        //  An IPv4 host is always written in its 4 byte binary form;  a URI host is only ever read.
         public override int Size()
         {
-            bool hasURI = false;// Host == null;  //  Is there ever a need for more than byte[4]?
             bool hasPort = EndPoint.Port != LinkInternet.MorphPort;
-            int size = 1;
-            if (hasURI)
-                size += 4 + (EndPoint.Address.ToString().Length * 2);
-            else
-                size += 4;
-            if (hasPort)
-                size += 2;
-            return size;
+            return 5 + (hasPort ? 2 : 0);
         }
 
         public override void Write(MorphWriter writer)
         {
             bool isIPv6 = false;
-            bool isString = false;// Host == null;  //  Is there ever a need for more than byte[4]?
+            bool isString = false;
             bool hasPort = EndPoint.Port != LinkInternet.MorphPort;
             //  Link byte
             writer.WriteLinkByte(LinkTypeID, isIPv6, isString, hasPort);
             //  Host
-            if (isString)
-                writer.WriteString(EndPoint.Address.ToString());
-            else
-            {
-                byte[] host = EndPoint.Address.GetAddressBytes();
-                writer.WriteInt8(host[0]);
-                writer.WriteInt8(host[1]);
-                writer.WriteInt8(host[2]);
-                writer.WriteInt8(host[3]);
-            }
+            writer.WriteBytes(EndPoint.Address.GetAddressBytes());
             // Port
             if (hasPort)
                 writer.WriteInt16(EndPoint.Port);

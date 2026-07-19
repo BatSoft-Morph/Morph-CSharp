@@ -21,13 +21,13 @@ namespace Morph.Endpoint
 
         public override int Size()
         {
-            return 5 + MorphWriter.SizeOfString(_serviceName);
+            return 3 + MorphWriter.SizeOfString(_serviceName);
         }
 
         public override void Write(MorphWriter writer)
         {
             writer.WriteLinkByte(LinkTypeID, false, false, false);
-            writer.WriteString(_serviceName);
+            writer.WriteIdentifier(_serviceName);
         }
 
         #endregion
@@ -160,7 +160,7 @@ namespace Morph.Endpoint
                 else
                     return new LinkApartment(reader.ReadInt32());
             else
-                return new LinkService(reader.ReadString());
+                return new LinkService(reader.ReadIdentifier());
         }
 
         protected virtual void ActionLinkService(LinkMessage message, LinkService linkService)

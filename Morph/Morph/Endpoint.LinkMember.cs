@@ -150,7 +150,7 @@ namespace Morph.Endpoint
         {
             bool isProperty, isSet, hasIndex;
             reader.ReadLinkByte(out isProperty, out isSet, out hasIndex);
-            string name = reader.ReadString();
+            string name = reader.ReadIdentifier();
             if (isProperty)
                 return new LinkProperty(name, isSet, hasIndex);
             else

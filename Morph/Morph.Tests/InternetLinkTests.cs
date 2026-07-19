@@ -31,7 +31,7 @@ namespace Morph.Tests
             MorphWriter writer = new MorphWriter(new MemoryStream());
             writer.WriteLinkByte(LinkTypeID.Internet, isIPv6, isString, false);
             if (isString)
-                writer.WriteString(stringHost);
+                writer.WriteIdentifier(stringHost);
             else
                 writer.WriteBytes(binaryHost);
             return writer.ToArray();

@@ -91,15 +91,15 @@ namespace Morph.Tests
         }
 
         [Test]
-        public void Enum_CarriesTypeNameAsString4ByteCount()
+        public void Enum_CarriesTypeNameAsIdentifier2ByteCount()
         {
             //  SimpleType:  EnumOrdinal | Size1Byte = 0x04;
-            //  payload:  enum type name as a string (4 byte count), then the ordinal
+            //  payload:  enum type name as an identifier (2 byte count), then the ordinal
             byte[] expected = new byte[]
             {
                 0x00,
                 0x04,
-                0x00, 0x00, 0x00, 0x0A,
+                0x00, 0x0A,
                 (byte)'W', (byte)'i', (byte)'r', (byte)'e', (byte)'C', (byte)'o', (byte)'l', (byte)'o', (byte)'u', (byte)'r',
                 0x02,
             };

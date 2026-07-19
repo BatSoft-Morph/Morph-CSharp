@@ -16,7 +16,7 @@ namespace Morph.Internet
             //  Read host
             IPAddress address;
             if (hasURI)
-                address = URIToAddress(reader.ReadString(), AddressFamily.InterNetworkV6);
+                address = URIToAddress(reader.ReadIdentifier(), AddressFamily.InterNetworkV6);
             else
                 address = new IPAddress(reader.ReadBytes(16));
             //  Read port
@@ -33,7 +33,7 @@ namespace Morph.Internet
         {
             int size = 1;
             //  Host
-            size += 4 + MorphWriter.SizeOfString(EndPoint.Address.ToString());
+            size += 2 + MorphWriter.SizeOfString(EndPoint.Address.ToString());
             //  Port
             if (EndPoint.Port != LinkInternet.MorphPort)
                 size += 2;
@@ -48,7 +48,7 @@ namespace Morph.Internet
             //  Link byte
             writer.WriteLinkByte(LinkTypeID, isIPv6, isString, hasPort);
             //  Host
-            writer.WriteString(EndPoint.Address.ToString());
+            writer.WriteIdentifier(EndPoint.Address.ToString());
             // Port
             if (hasPort)
                 writer.WriteInt16(EndPoint.Port);

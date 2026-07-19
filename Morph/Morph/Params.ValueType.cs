@@ -10,8 +10,10 @@ namespace Morph.Params
 
         public const byte HasTypeName = 0x01;
         public const byte HasValueName = 0x02;
+        /// <summary>Reserved - not to be used yet.  If set, this is only the type information, no value data.</summary>
+        public const byte IsTypeDefinition = 0x04;
         /// <summary>Unset means the value is sent by value.  Iff set and not IsNull, a 4 byte ReferenceID follows the names.</summary>
-        public const byte IsReference = 0x04;
+        public const byte IsReference = 0x08;
         /// <summary>Iff set, nothing follows the names, whatever the other flags say.
         /// Only meaningful when encoding a value.  When decoding a type, ignore this flag.</summary>
         public const byte IsNull = 0x80;
