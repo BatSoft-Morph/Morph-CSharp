@@ -140,5 +140,38 @@ namespace BookingClient.Maui
         }
 
         #endregion
+
+        #region Signing off
+
+        //  Mirrors the console client's FormClosing.  Disposing the server apartment proxy sends the
+        //  Morph End link that tells the server this client has signed off, so the server can decrement
+        //  its client count and shut down when the last client leaves.  A socket close alone would not
+        //  do this:  apartments are not owned by connections.  Best-effort - a failure here must never
+        //  stop the window from closing.
+        public void SignOff()
+        {
+            if (_bookingServer == null)
+                return;
+            //  Release a held booking first, so a departing client does not leave its object owned by a ghost
+            if (ReleaseButton.IsEnabled)
+                try
+                {
+                    _bookingServer.Unbook(ObjectNameEntry.Text);
+                }
+                catch
+                {
+                }
+            //  Dispose the server apartment proxy:  this sends the Morph End link
+            try
+            {
+                (_bookingServer as BookingDiplomatServerProxy)?.ServletProxy.ApartmentProxy.Dispose();
+            }
+            catch
+            {
+            }
+            _bookingServer = null;
+        }
+
+        #endregion
     }
 }

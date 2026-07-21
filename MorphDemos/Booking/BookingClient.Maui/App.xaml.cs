@@ -13,15 +13,19 @@ namespace BookingClient.Maui
 
         protected override Window CreateWindow(IActivationState activationState)
         {
-            Window window = new Window(new MainPage())
+            MainPage mainPage = new MainPage();
+            Window window = new Window(mainPage)
             {
                 Title = "Booking Client (Morph demo)",
                 Width = 560,
                 Height = 520,
             };
-            //  Tear down Morph (pure client, no daemon):  stop the worker threads and close connections.
+            //  Tear down Morph (pure client, no daemon).  First sign off from the server (send the
+            //  Morph End so the server can shut down when its last client leaves), then stop the
+            //  worker threads and close connections.
             window.Destroying += (sender, args) =>
             {
+                mainPage.SignOff();
                 ActionHandler.SetThreadCount(0);
                 Connections.CloseAll();
             };
