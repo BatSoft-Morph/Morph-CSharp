@@ -41,8 +41,9 @@ testing remains.
    `ActionHandler.SetThreadCount(2)` **once** at app startup (`MauiProgram.CreateMauiApp`) —
    this is pure-local (no network), so it needs no `Task.Run`. Only the connect itself
    (`MorphApartmentProxy.ViaString`, step 1) goes on a background thread. Shutdown is
-   `SetThreadCount(0)` + `Connections.CloseAll()` on window teardown. (Server apps still call
-   `MorphManager.Startup`/`Shutdown`.)
+   `SetThreadCount(0)` + `Connections.CloseAll()` on window teardown — a client that holds a
+   server-tracked session also signs off first (see Booking under *Status*). (Server apps still
+   call `MorphManager.Startup`/`Shutdown`.)
 4. Use `DisplayAlertAsync`, not the obsolete `DisplayAlert`.
 5. Csproj: `UseMaui`, `SingleProject`; multi-target clients use
    `<TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks>` with
@@ -62,8 +63,15 @@ testing remains.
   client gained a **Host** entry (default `127.0.0.1`) because `ViaString` needs a target address
   (the WinForms client hard-wired the local daemon via `ViaLocal`); the server's Morph-logic
   classes (`BookingObjects`/`Factories`/`Server.cs`) are copied into `BookingServer.Maui` rather
-  than shared, matching the WinForms server's own-assembly layout; the client relies on
-  connection-close for booking release rather than an explicit pre-close `Unbook`.
+  than shared, matching the WinForms server's own-assembly layout. On window teardown the client
+  **signs off** (`MainPage.SignOff()`, invoked from `App.CreateWindow`'s `window.Destroying` before
+  the `SetThreadCount(0)`/`CloseAll` teardown): it releases a held booking, then disposes the
+  server apartment proxy, which sends the Morph `End` link that disposes the server's session
+  apartment (`BookingRegistrationSession`) — so the server's client count decrements and it shuts
+  down when the last client leaves. A socket close alone does **not** achieve this: apartments are
+  not owned by connections, so `Connections.CloseAll()` closes the transport but never disposes the
+  server apartment (mirrors the WinForms client's `FormClosing`). Both sign-off steps are
+  best-effort so a hung server can't block the window from closing.
 - **Clique — done.** `Clique.Maui` (Windows + Android) — a **daemon-less peer** built fresh (Morph
   library only, replicating the deleted Xamarin `Clique.Droid`: link types + `SetThreadCount` +
   `MorphServices.Register` via `MorphApartmentFactoryShared`). WinForms `lstFriends` ListView →

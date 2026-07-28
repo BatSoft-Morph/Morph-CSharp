@@ -64,7 +64,23 @@ inbound connection (chat still works over the connection the initiator opens). I
 `Clique.Droid`. Adding `ListenerManager.Obtain(LinkInternet.MorphPort).StartAll()` in `MauiProgram`
 would enable inbound. Left out to stay faithful — decision pending. Details in `Maui-Demos.md`.
 
+### 12. Minor-version mismatch is rejected outright
+`Internet.Connection.TestMorphValidation` throws "Incompatible Minor versions" and closes the
+connection on **any** differing Minor byte. But the Connection tab defines Minor as the channel for
+*possibly compatible* differences (only Major marks a clearly-incompatible change). Rejecting all
+minor mismatches therefore contradicts the definition's stated intent. Decide the policy: keep the
+strict reject (safe, current), or accept-and-proceed on minor differences. Major-version reject is
+correct as-is. (Surfaced by the full definition-vs-code audit, 2026-07-22.)
+**Parked until production (Peter, 2026-07-22):** nothing is in production yet, so version-number
+behaviour affects no one and Peter sets the numbers freely. Do not raise version-number concerns
+again until Peter says Morph has gone to production. See the
+`morph-version-numbers-not-a-concern-preproduction` memory.
+
 ### 11. Minor known issues (low priority)
+- **`ValueType.IsTypeDefinition` (0x04) is ignored on decode.** The bit is reserved ("not to be
+  used") in the ValueType tab, so no compliant peer sets it; the decoder defines the constant but
+  never checks it, and would fall through to reading value data if a peer ever did set it. Harmless
+  while reserved. (Audit, 2026-07-22.)
 - **WinForms `BookingServer` runs headless** — its `Program.Main` has `Application.Run(new
   BookingServerForm())` commented out, so it registers the service and stays alive on foreground
   worker threads but shows **no window**. It looks like it failed to launch; it hasn't. (This
@@ -104,6 +120,21 @@ From the multi-agent defect review, these were investigated and are **correct as
   owned by connections (see the `morph-apartments-not-owned-by-connections` memory).
 
 ## Resolved this session
+- **Full definition-vs-code audit (2026-07-22).** Re-extracted the current `Morph Protocol.xlsx`
+  (definition tag `2.1`, commit `6f05cfa`) and compared every wire-format-bearing file against all
+  six sheets (Connection, LinkType, LinkType Data, ValueType, SimpleType, LinkSequence). Result: the
+  implementation **fully conforms** — handshake bytes, all 16 LinkType IDs, every implemented link
+  (End/Message/Data/Service/Servlet/Member/Internet/Sequence), the ValueType and SimpleType byte
+  layouts, and ParamCount/Special framing all match; identifier-vs-string usage is correct
+  throughout. Known-unimplemented items (Information/Process/Encoding/Stream links, When-numeric,
+  servlet array-index, multidimensional arrays) match the sheet's own C# assessment scores. Two
+  findings raised as open items (see 12; and IsTypeDefinition under 11). `Morph.Tests` 86/86 green.
+- **`BookingClient.Maui` now signs off on shutdown (2026-07-22).** Details in `Maui-Demos.md` (Booking
+  under *Status*) — corrects the earlier claim that the client relied on connection-close for
+  release. Disposing the server apartment proxy sends the Morph `End` that disposes the server's
+  `BookingRegistrationSession`, so the server counts down and shuts down at its last client (without
+  it the server waited forever). Also fixed a compile error: a dangling `…ServletProxy.Path.`
+  fragment in the old, unwired `contentPage1_Disappearing`, now removed.
 - Date/time conversion replaced with `System.Xml.XmlConvert` (`Lib.Conversion`).
 - `HostURI` DNS resolution added (`LinkInternet.URIToAddress`, used by IPv4/IPv6 readers).
 - All projects migrated to SDK-style; `Morph.Daemon` in particular (fixes IDE namespace
